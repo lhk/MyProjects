@@ -112,7 +112,7 @@ namespace MinesweeperBot
         /// </summary>
         /// <param name="sqlite"></param>
         /// <returns>new entry => true, updated => false</returns>
-        public bool SaveToDatabase(SQLiteConnection sqlite,bool openCloseDB)
+        public bool SaveToDatabase(SQLiteConnection sqlite, bool openCloseDB)
         {
             if (openCloseDB) sqlite.Open();
 
@@ -129,10 +129,14 @@ namespace MinesweeperBot
                 cmd = sqlite.CreateCommand();
                 cmd.CommandText = "UPDATE LabeledData SET 'Label' = @label, 'PreLabel' = @prelabel, 'Set' = @set WHERE 'ID' == @id";
                 cmd.Parameters.Add(new SQLiteParameter("@id", ID));
-                cmd.Parameters.Add(new SQLiteParameter("@label", Label));
-                cmd.Parameters.Add(new SQLiteParameter("@prelabel", PreLabel));
-                cmd.Parameters.Add(new SQLiteParameter("@set", Set));
+                cmd.Parameters.Add(new SQLiteParameter("@label", Label.ToString()));
+                cmd.Parameters.Add(new SQLiteParameter("@prelabel", PreLabel.ToString()));
+                cmd.Parameters.Add(new SQLiteParameter("@set", Set.ToString()));
                 int count = cmd.ExecuteNonQuery();
+                if (count > 0)
+                {
+
+                }
             }
             else
             {
@@ -140,9 +144,9 @@ namespace MinesweeperBot
                 cmd.CommandText = "INSERT INTO LabeledData('ID', 'Features', 'Label', 'PreLabel', 'Set') VALUES (@id, @features, @label, @prelabel, @set)";
                 cmd.Parameters.Add(new SQLiteParameter("@id", ID));
                 cmd.Parameters.Add(new SQLiteParameter("@features", FormatHelper.DoubleArrayToString(Features, digits)));
-                cmd.Parameters.Add(new SQLiteParameter("@label", Label));
-                cmd.Parameters.Add(new SQLiteParameter("@prelabel", PreLabel));
-                cmd.Parameters.Add(new SQLiteParameter("@set", Set));
+                cmd.Parameters.Add(new SQLiteParameter("@label", Label.ToString()));
+                cmd.Parameters.Add(new SQLiteParameter("@prelabel", PreLabel.ToString()));
+                cmd.Parameters.Add(new SQLiteParameter("@set", Set.ToString()));
                 int count = cmd.ExecuteNonQuery();
             }
 

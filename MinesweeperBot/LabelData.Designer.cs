@@ -32,7 +32,6 @@
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -101,22 +100,11 @@
             this.comboBox2.TabIndex = 4;
             this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(721, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "Delete All";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // LabelData
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(897, 531);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(956, 619);
             this.Controls.Add(this.comboBox2);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.comboBox1);
@@ -125,6 +113,8 @@
             this.Text = "LabelData";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.LabelData_Paint);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.LabelData_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.LabelData_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LabelData_MouseUp);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -136,6 +126,5 @@
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.Button button1;
     }
 }

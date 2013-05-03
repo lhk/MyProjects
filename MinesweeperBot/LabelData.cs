@@ -15,7 +15,10 @@ namespace MinesweeperBot
         int startX = 50;
         int startY = 100;
         int stepXY = 25;
-        Point click = new Point(-1, -1);
+        Point mouseDown = new Point(-1, -1);
+        Point mouseUp = new Point(-1, -1);
+        Point mouseDownScreen = new Point(-1, -1);
+        Point mouseMoveScreen = new Point(-1, -1);
 
         public LabelData()
         {
@@ -38,6 +41,10 @@ namespace MinesweeperBot
             var DataSet = Storage.DataPoints;
 
             int position = 0;
+            bool labelChanged = false;
+
+            if (mouseDownScreen.X >= 0) 
+                g.DrawRectangle(new Pen(Color.Black, 2), Math.Min(mouseDownScreen.X, mouseMoveScreen.X), Math.Min(mouseDownScreen.Y, mouseMoveScreen.Y), Math.Abs(mouseDownScreen.X - mouseMoveScreen.X), Math.Abs(mouseDownScreen.Y - mouseMoveScreen.Y));
 
             for (int i = 0; i < DataSet.Count; i++)
             {
@@ -45,16 +52,28 @@ namespace MinesweeperBot
                 {
                     DataSet[i].Draw(g, startX + position % lineWidth * stepXY, startY + position / lineWidth * stepXY, 1);
 
-                    if(click.X==position % lineWidth && click.Y==position / lineWidth)
+
+                    // check selection
+                    if (mouseDown.X >= 0 && mouseDown.Y >= 0 && mouseUp.X >= 0 && mouseUp.Y >= 0)
                     {
-                        if (comboBox2.SelectedIndex >= 0)
+                        // check if current datapoint is in selection
+                        if (Math.Min(mouseDown.X, mouseUp.X) <= position % lineWidth &&
+                            Math.Max(mouseDown.X, mouseUp.X) >= position % lineWidth &&
+                            Math.Min(mouseDown.Y, mouseUp.Y) <= position / lineWidth &&
+                            Math.Max(mouseDown.Y, mouseUp.Y) >= position / lineWidth)
+                        {
                             DataSet[i].Label = ((string)(comboBox2.Items[comboBox2.SelectedIndex]))[0];
-                        click = new Point(-1, -1);
-                        Invalidate();
-                        return;
+                            labelChanged = true;
+                        }
                     }
                     position++;
                 }
+            }
+            if (labelChanged)
+            {
+                mouseDown = new Point(-1, -1);
+                mouseUp = new Point(-1, -1);
+                Invalidate();
             }
 
         }
@@ -63,15 +82,13 @@ namespace MinesweeperBot
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                click = new Point((e.X - startX) / stepXY, (e.Y - startY) / stepXY);
+                Point p = new Point((e.X - startX) / stepXY, (e.Y - startY) / stepXY);
 
-                if (e.X >= startX &&
-                    e.Y >= startY &&
-                    click.X < lineWidth)
+                if (e.X >= startX && e.Y >= startY && p.X < lineWidth)
                 {
-
+                    mouseDown = p;
+                    mouseDownScreen = e.Location;
                 }
-                else click = new Point(-1, -1);
             }
             Invalidate();
         }
@@ -86,18 +103,27 @@ namespace MinesweeperBot
             Invalidate();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void LabelData_MouseMove(object sender, MouseEventArgs e)
         {
-            var newList = new List<DataPoint>();
-            for (int i = 0; i < Storage.DataPoints.Count; i++)
+            Invalidate();
+            mouseMoveScreen = e.Location;
+        }
+
+        private void LabelData_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                if (comboBox1.SelectedIndex >= 0 && Storage.DataPoints[i].Label != ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
+                Point p = new Point((e.X - startX) / stepXY, (e.Y - startY) / stepXY);
+
+                if (e.X >= startX && e.Y >= startY && p.X < lineWidth)
                 {
-                    newList.Add(Storage.DataPoints[i]);
+                    mouseUp = p;
+                    mouseDownScreen = new Point(-1, -1);
+                    mouseMoveScreen = new Point(-1, -1);
                 }
             }
-            Storage.DataPoints = newList;
             Invalidate();
         }
+
     }
 }

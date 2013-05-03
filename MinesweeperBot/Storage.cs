@@ -88,5 +88,22 @@ namespace MinesweeperBot
                 return nnpCount;
             }
         }
+
+        internal static void Save()
+        {
+            SQLite.Open();
+            new SQLiteCommand("begin", SQLite).ExecuteNonQuery();
+
+            for (int i = 0; i < DataPoints.Count; i++)
+            {
+                if (i == 5088)
+                {
+                }
+                DataPoints[i].SaveToDatabase(SQLite, false);
+            }
+
+            new SQLiteCommand("end", SQLite).ExecuteNonQuery(); 
+            SQLite.Close();
+        }
     }
 }

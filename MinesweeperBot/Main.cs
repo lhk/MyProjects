@@ -30,6 +30,7 @@ namespace MinesweeperBot
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Storage.Save();
         }
 
         private void register(Form f)
