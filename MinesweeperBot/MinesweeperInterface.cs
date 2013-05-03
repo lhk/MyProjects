@@ -15,6 +15,8 @@ namespace MinesweeperBot
     public partial class MinesweeperInterface : Form
     {
         Bitmap screenshot;
+        Bitmap lastScreenshot = null;
+        private bool running;
         byte[, ,] defaultImageByteArray;
         byte[, ,] screenshotByteArray;
         int[, ,] differencesArray;
@@ -33,16 +35,17 @@ namespace MinesweeperBot
             InitializeComponent();
             DoubleBuffered = true;
             WindowState = FormWindowState.Maximized;
-            defaultImageByteArray = BitmapToByteArray((Bitmap)Bitmap.FromFile(Program.GetBasePath()+"\\defaultImage.png"));
+            try { defaultImageByteArray = BitmapToByteArray((Bitmap)Bitmap.FromFile(Program.GetBasePath() + "\\defaultImage.png")); }
+            catch { }
         }
 
         private void Scan()
         {
             if (GetTopWindowText() == "Minesweeper")
             {
-                screenshot = CaptureScreenshot();
-                //screenshot.Save(Program.GetBasePath() + "\\defaultImage.png");
+                lastScreenshot = screenshot = CaptureScreenshot();
                 screenshotByteArray = BitmapToByteArray(screenshot);
+                if (defaultImageByteArray == null) defaultImageByteArray = new byte[screenshot.Width, screenshot.Height, 3];
 
                 if (screenshotByteArray.Length == defaultImageByteArray.Length)
                 {
@@ -92,7 +95,7 @@ namespace MinesweeperBot
                 Graphics g = e.Graphics;
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.TranslateTransform(20, 20);
-                Text = "MinesweeperInterface - #data: " + Storage.s.DataSet.Count.ToString();
+                Text = "MinesweeperInterface - #data: " + Storage.DataPoints.Count.ToString();
                 if (screenshot != null)
                 {
                     e.Graphics.DrawImage(screenshot, 20, 20);
@@ -124,21 +127,19 @@ namespace MinesweeperBot
                     else if (nextClick.X == -1)
                     {
                         g.DrawString("No Click-Point found.", new Font("Arial", 20), new SolidBrush(Color.Red), 50, 750);
-                        Thread.Sleep(10);
                     }
                 }
                 else
                 {
                     g.DrawLine(new Pen(Color.Red, 3), 10, 10, 100, 100);
                     g.DrawLine(new Pen(Color.Red, 3), 10, 100, 100, 10);
-                    Thread.Sleep(10);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
             }
-            Invalidate();
+            running = false;
         }
 
         char[,] CategorizeField()
@@ -161,7 +162,7 @@ namespace MinesweeperBot
                 for (int x = 0; x < width && allDiffZero; x++)
                     for (int y = 0; y < height && allDiffZero; y++)
                         for (int i = 0; i < 3 && allDiffZero; i++)
-                            if (differencesArray[offset_x + x, offset_y + y, i] != 0) 
+                            if (Math.Abs(differencesArray[offset_x + x, offset_y + y, i]) > 1) 
                                 allDiffZero = false;
 
                 if (allDiffZero)
@@ -172,29 +173,28 @@ namespace MinesweeperBot
             }
             
             // create new data point for learning algorithm
-            DataPoint p = new DataPoint();
-            p.Features = new double[width * height];
+            
+            double[] Features = new double[width * height];
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    p.Features[x * width + y] =
+                    Features[x * width + y] =
                         (screenshotByteArray[offset_x + x, offset_y + y, 0] +
                         screenshotByteArray[offset_x + x, offset_y + y, 1] +
                         screenshotByteArray[offset_x + x, offset_y + y, 2]);
                 }
             }
-            p.Label = SupervisedLearningAlgo.evaluateFunction(p);
+            char evaluation;
+            DataPoint p = new DataPoint(Features, '?', evaluation=SupervisedLearningAlgo.evaluateFunction(Features), '?');
 
             // add datapoint to database
-            if (allowDataAdding && !Storage.s.DataSet.Contains(p))
+            if (allowDataAdding && p.SaveToDatabase(Storage.SQLite))
             {
-                Storage.s.DataSet.Add(p);
+                Storage.DataPoints.Add(p);
             }
 
-
-            // evaluate classifier function
-            return p.Label;
+            return evaluation;
         }
 
         private byte[, ,] BitmapToByteArray(Bitmap bitmap)
@@ -292,12 +292,30 @@ namespace MinesweeperBot
         private const int MOUSEEVENTF_LEFTUP = 0x04;
         private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
+        
 
         private void MinesweeperInterface_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Middle && screenshot!=null)
+            /*if (e.Button == System.Windows.Forms.MouseButtons.Middle && screenshot!=null)
             {
                 screenshot.Save(Program.GetBasePath() + "\\defaultImage.png");
+            }*/
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (lastScreenshot != null)
+            {
+                lastScreenshot.Save(Program.GetBasePath() + "\\defaultImage.png");
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (!running)
+            {
+                running = true;
+                Invalidate();
             }
         }
     }

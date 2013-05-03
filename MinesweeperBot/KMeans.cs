@@ -30,13 +30,13 @@ namespace MinesweeperBot
 
         private static CentroidSet RandomInit()
         {
-            CentroidSet startCentroidSet = new CentroidSet(Storage.s.DataSet.Count, Storage.s.DataPointDimensions, Storage.s.CentroidCount);
+            CentroidSet startCentroidSet = new CentroidSet(Storage.DataPoints.Count, Storage.s.DataPointDimensions, Storage.s.CentroidCount);
 
             for (int k = 0; k < Storage.s.CentroidCount; k++)
             {
-                int index = GenuineRandomGenerator.GetInt(Storage.s.DataSet.Count);
+                int index = GenuineRandomGenerator.GetInt(Storage.DataPoints.Count);
                 for (int n = 0; n < Storage.s.DataPointDimensions; n++)
-                    startCentroidSet.Centroids[k][n] = Storage.s.DataSet[index].Features[n];
+                    startCentroidSet.Centroids[k][n] = Storage.DataPoints[index].Features[n];
             }
             return startCentroidSet;
         }
@@ -46,8 +46,8 @@ namespace MinesweeperBot
             for (int i = 0; i < numericUpDown1.Value; i++)
             {
                 var c = CentroidSetHistory[CentroidSetHistory.Count - 1].Clone();
-                c.AssignmentStep(Storage.s.DataSet);
-                c.MoveStep(Storage.s.DataSet);
+                c.AssignmentStep(Storage.DataPoints);
+                c.MoveStep(Storage.DataPoints);
                 CentroidSetHistoryAdd(c);
             }            
         }
@@ -58,10 +58,10 @@ namespace MinesweeperBot
         {
             var c = CentroidSetHistory[CentroidSetHistory.Count - 1].Clone();
 
-            int i = GenuineRandomGenerator.GetInt(Storage.s.DataSet.Count);
+            int i = GenuineRandomGenerator.GetInt(Storage.DataPoints.Count);
             int k = GenuineRandomGenerator.GetInt(Storage.s.CentroidCount);
             for (int n = 0; n < Storage.s.DataPointDimensions; n++)
-                c.Centroids[k][n] = Storage.s.DataSet[i].Features[n] + .1;
+                c.Centroids[k][n] = Storage.DataPoints[i].Features[n] + .1;
             CentroidSetHistoryAdd(c);
 
         }
@@ -74,7 +74,7 @@ namespace MinesweeperBot
             for (int i = 0; i < CentroidSetHistory.Count; i++)
             {
                 double cost;
-                if ((cost = (CentroidSetHistory[i].Cost(Storage.s.DataSet))) < min)
+                if ((cost = (CentroidSetHistory[i].Cost(Storage.DataPoints))) < min)
                 {
                     min = cost;
                     index = i;
@@ -91,7 +91,7 @@ namespace MinesweeperBot
         private void CentroidSetHistoryAdd(CentroidSet centroidSet)
         {
             centroidSet = centroidSet.Clone();
-            chart1.Series[0].Points.Add(centroidSet.Cost(Storage.s.DataSet));
+            chart1.Series[0].Points.Add(centroidSet.Cost(Storage.DataPoints));
             CentroidSetHistory.Add(centroidSet);
         }
 

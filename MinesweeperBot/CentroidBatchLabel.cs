@@ -29,9 +29,9 @@ namespace MinesweeperBot
             Graphics g = e.Graphics;
 
             int position = 0;
-            for (int i = 0; i < Storage.s.DataSet.Count; i++) if(Storage.s.CentroidSet.DataCentroidConnection[i] == numericUpDown1.Value)
+            for (int i = 0; i < Storage.DataPoints.Count; i++) if(Storage.s.CentroidSet.DataCentroidConnection[i] == numericUpDown1.Value)
             {
-                Storage.s.DataSet[i].Draw(g, (position % 40) * 30 + 50, (position / 40) * 30 + 50, 1);
+                Storage.DataPoints[i].Draw(g, (position % 40) * 30 + 50, (position / 40) * 30 + 50, 1);
                 position++;
             }
         }
@@ -46,9 +46,9 @@ namespace MinesweeperBot
             if (textBox1.Text.Length == 1)
             {
                 char c = textBox1.Text[0];
-                for (int i = 0; i < Storage.s.DataSet.Count; i++)
+                for (int i = 0; i < Storage.DataPoints.Count; i++)
                     if (Storage.s.CentroidSet.DataCentroidConnection[i] == numericUpDown1.Value)
-                        Storage.s.DataSet[i].Label = c;
+                        Storage.DataPoints[i].Label = c;
             }
             
         }

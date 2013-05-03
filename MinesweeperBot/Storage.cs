@@ -6,74 +6,77 @@ using System.Xml.Serialization;
 using System.IO;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Data.SQLite;
+using System.Windows.Forms;
 
 namespace MinesweeperBot
 {
     public class Storage
     {
+        // new SQLite
+
+        public static List<DataPoint> DataPoints;
+        public static SQLiteConnection SQLite = new SQLiteConnection("Data Source=" + Program.GetBasePath() + "\\db.sqlite" + ";Version=3;Compress=True;");
+
+
+        // old XML
         public static Storage s;
 
-        public List<DataPoint> DataSet;
+        //public List<DataPoint> DataSet;
         public int[] TrainingSetMapping;
         public int[] TestSetMapping;
-        public int DataPointDimensions { get { return DataSet[0].Features.Length; } }
+        public int DataPointDimensions { get { return DataPoints[0].Features.Length; } }
         public int CentroidCount = 30;
-        public string ClassificationSet;        
+        public string ClassificationSet;
         public CentroidSet CentroidSet;
         public double learningRate = 0.0001;
         public double[] NeuronalNetworkParameters;
 
         [XmlIgnore]
         public readonly int[] NeuronalNetworkConfiguration = new int[] { 256, 15, 11 };
-        
-        /*
-        public double[][] parameterMatrixSerialize
+
+
+        public static void Load( )
         {
-            get
+            s = new Storage();
+
+            DataPoints = new List<DataPoint>();
+
+
+            SQLite.Open();
+            var res = new SQLiteCommand("SELECT * FROM LabeledData", SQLite).ExecuteReader();
+            while (res.Read())
             {
-                if (parameterMatrix == null) return null;
-                double[][] res = new double[parameterMatrix.RowCount][];
-                for (int k = 0; k < parameterMatrix.RowCount; k++)
+                string ID = "";
+                string Features = "";
+                char Label = '?', PreLabel = '?', Set = '?';
+
+                for (int i = 0; i < res.VisibleFieldCount; i++)
                 {
-                    res[k] = new double[parameterMatrix.ColumnCount];
-                    for (int n = 0; n < parameterMatrix.ColumnCount; n++)
+                    switch (res.GetName(i))
                     {
-                        res[k][n] = parameterMatrix[k, n];
+                        case "ID": ID = res.GetString(i); break;
+                        case "Features": Features = res.GetString(i); break;
+                        case "Label": Label = res.GetString(i)[0]; break;
+                        case "PreLabel": PreLabel = res.GetString(i)[0]; break;
+                        case "Set": Set = res.GetString(i)[0]; break;
                     }
                 }
-                return res;
+                DataPoints.Add(new DataPoint(ID, Features, Label, PreLabel, Set));
             }
-            set
-            {
-                parameterMatrix = new DenseMatrix(value.Length, value[0].Length);
-                for (int k = 0; k < value.Length; k++)
-                {
-                    for (int n = 0; n < value[0].Length; n++)
-                    {
-                        parameterMatrix[k, n] = value[k][n];
-                    }
-                }
+            SQLite.Close();
 
-            }
-        }*/
 
-        public static void Load(string file)
-        {
-            XmlSerializer XmlSerializer = new XmlSerializer(typeof(Storage));
-            try { using (var r = new StreamReader(file)) s = (Storage)XmlSerializer.Deserialize(r); }
-            catch
+            /*foreach (var item in s.DataSet)
             {
-                s = new Storage();
-                s.DataSet = new List<DataPoint>();
-            }
+                string features = FormatHelper.DoubleArrayToString(item.Features,3);
+                string id = FormatHelper.hash(features);
+
+                DataPointDB p = new DataPointDB(id,features,item.Label,'?','?');
+                Storage.DataPoints.Add(p);
+            }*/
         }
 
-        public static void Save(string file)
-        {
-            XmlSerializer XmlSerializer = new XmlSerializer(typeof(Storage));
-            using (var w = new StreamWriter(file))
-                XmlSerializer.Serialize(w, s);
-        }
 
         public int NeuronalNetworkParameterCount
         {

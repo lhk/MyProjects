@@ -11,42 +11,25 @@ using System.Drawing.Imaging;
 using System.Threading;
 using System.Xml.Serialization;
 using System.IO;
-using MySql.Data.MySqlClient;
+using System.Data.SQLite;
 
 namespace MinesweeperBot
 {
     public partial class Main : Form
     {
         public static Main _Main;
-        //public List<DataPoint> Storage.s.DataSet = new List<DataPoint>();
-        //string Storage.s.DataSetFile = "D:\\Storage.s.DataSet.xml";
-        string StorageFile = Program.GetBasePath() + "\\Storage.xml";
-
-        MySqlConnection MySqlConnection;
-        string MySqlConnectionString;
 
         public Main()
         {
             InitializeComponent();
             DoubleBuffered = true;
             WindowState = FormWindowState.Maximized;
-
-            // format: Server=ip/host;Database=usr_web464_1;Uid=name;Pwd=esrtgq34ta;
-            using (TextReader reader = File.OpenText(@"D:\MinesweeperBotMySqlLogin.txt"))
-                MySqlConnectionString = reader.ReadToEnd();
-
-            MySqlConnection = new MySqlConnection(MySqlConnectionString);
-            var cmd = MySqlConnection.CreateCommand();
-            cmd.CommandText = "SHOW TABLES";
-            var res = cmd.ExecuteReader();
-
-            Storage.Load(StorageFile);
+            Storage.Load();
             _Main = this;
         }
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Storage.Save(StorageFile);
         }
 
         private void register(Form f)
@@ -81,7 +64,8 @@ namespace MinesweeperBot
 
         private void button6_Click(object sender, EventArgs e)
         {
-            register(new MySQLConsole());
+            register(new SQLiteConsole());
+
         }
     }
 }

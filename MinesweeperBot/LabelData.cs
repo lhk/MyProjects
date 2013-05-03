@@ -35,7 +35,7 @@ namespace MinesweeperBot
         {
             lineWidth = (ClientSize.Width - 2 * startX) / stepXY;
             Graphics g = e.Graphics;
-            var DataSet = Storage.s.DataSet;
+            var DataSet = Storage.DataPoints;
 
             int position = 0;
 
@@ -89,14 +89,14 @@ namespace MinesweeperBot
         private void button1_Click(object sender, EventArgs e)
         {
             var newList = new List<DataPoint>();
-            for (int i = 0; i < Storage.s.DataSet.Count; i++)
+            for (int i = 0; i < Storage.DataPoints.Count; i++)
             {
-                if (comboBox1.SelectedIndex >= 0 && Storage.s.DataSet[i].Label != ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
+                if (comboBox1.SelectedIndex >= 0 && Storage.DataPoints[i].Label != ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
                 {
-                    newList.Add(Storage.s.DataSet[i]);
+                    newList.Add(Storage.DataPoints[i]);
                 }
             }
-            Storage.s.DataSet = newList;
+            Storage.DataPoints = newList;
             Invalidate();
         }
     }

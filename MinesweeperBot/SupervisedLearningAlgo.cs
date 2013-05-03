@@ -100,10 +100,10 @@ namespace MinesweeperBot
             {
                 bool[] desiredOutput = new bool[Storage.s.ClassificationSet.Length];
                 for (int j = 0; j < Storage.s.ClassificationSet.Length; j++)
-                    desiredOutput[j] = Storage.s.ClassificationSet[j] == Storage.s.DataSet[usedSet[i]].Label;
+                    desiredOutput[j] = Storage.s.ClassificationSet[j] == Storage.DataPoints[usedSet[i]].Label;
 
 
-                sumError += individualError(NeuronalNetworkParameters, new DenseVector(Storage.s.DataSet[usedSet[i]].Features), desiredOutput);
+                sumError += individualError(NeuronalNetworkParameters, new DenseVector(Storage.DataPoints[usedSet[i]].Features), desiredOutput);
             }*/
             double[] result = new double[usedSet.Length];
             double sumError = 0;
@@ -113,10 +113,10 @@ namespace MinesweeperBot
             {
                 bool[] desiredOutput = new bool[Storage.s.ClassificationSet.Length];
                 for (int j = 0; j < Storage.s.ClassificationSet.Length; j++)
-                    desiredOutput[j] = Storage.s.ClassificationSet[j] == Storage.s.DataSet[usedSet[i]].Label;
+                    desiredOutput[j] = Storage.s.ClassificationSet[j] == Storage.DataPoints[usedSet[i]].Label;
 
 
-                result[i] = individualError(NeuronalNetworkParameters, new DenseVector(Storage.s.DataSet[usedSet[i]].Features), desiredOutput);
+                result[i] = individualError(NeuronalNetworkParameters, new DenseVector(Storage.DataPoints[usedSet[i]].Features), desiredOutput);
             });
             foreach (var item in result)
             {
@@ -133,13 +133,13 @@ namespace MinesweeperBot
             List<char> allowedLabels = new List<char>("01234567xf".ToCharArray());
             Dictionary<char, int> existingLabels = new Dictionary<char, int>();
 
-            for (int i = 0; i < Storage.s.DataSet.Count; i++)
+            for (int i = 0; i < Storage.DataPoints.Count; i++)
             {
-                if (allowedLabels.Contains(Storage.s.DataSet[i].Label))
+                if (allowedLabels.Contains(Storage.DataPoints[i].Label))
                 {
                     activeSubsetList.Add(i);
-                    if (!existingLabels.ContainsKey(Storage.s.DataSet[i].Label)) existingLabels.Add(Storage.s.DataSet[i].Label,1);
-                    else existingLabels[Storage.s.DataSet[i].Label]++;
+                    if (!existingLabels.ContainsKey(Storage.DataPoints[i].Label)) existingLabels.Add(Storage.DataPoints[i].Label,1);
+                    else existingLabels[Storage.DataPoints[i].Label]++;
                 }
             }
             activeSubsetList.ToArray();
@@ -240,7 +240,7 @@ namespace MinesweeperBot
 
             for (int i = 0; i < usedSet.Length; i++)
             {
-                if (Storage.s.DataSet[usedSet[i]].Label == evaluateFunction(Storage.s.DataSet[usedSet[i]]))
+                if (Storage.DataPoints[usedSet[i]].Label == evaluateFunction(Storage.DataPoints[usedSet[i]].Features))
                     rightCounter++;
                 else wrongCounter++;
             }
@@ -248,10 +248,10 @@ namespace MinesweeperBot
             return (rightCounter) / (rightCounter + wrongCounter);
         }
 
-        public static char evaluateFunction(DataPoint p)
+        public static char evaluateFunction(double[] features)
         {
-            if (p == null || Storage.s.NeuronalNetworkParameters == null || Storage.s.ClassificationSet == null) return '?';
-            var output = forwardProp(Storage.s.NeuronalNetworkParameters, new DenseVector(p.Features));
+            if (Storage.s.NeuronalNetworkParameters == null || Storage.s.ClassificationSet == null) return '?';
+            var output = forwardProp(Storage.s.NeuronalNetworkParameters, new DenseVector(features));
             double highestProbability = 0;
             int outputLabelIndex = -1;
             for (int j = 0; j < output.Count; j++)

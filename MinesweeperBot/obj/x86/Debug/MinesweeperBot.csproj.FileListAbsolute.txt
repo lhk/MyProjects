@@ -38,8 +38,9 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\Mines
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.LabelData.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.Main.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.MinesweeperInterface.resources
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.MySQLConsole.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.Properties.Resources.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SupervisedLearningAlgo.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.read.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SQLiteConsole.resources
+C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MinesweeperBot.exe.config
