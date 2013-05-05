@@ -48,7 +48,7 @@ namespace MinesweeperBot
 
             for (int i = 0; i < DataSet.Count; i++)
             {
-                if (comboBox1.SelectedIndex >= 0 && DataSet[i].Label == ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
+                if (comboBox1.SelectedIndex >= 0 && (checkBox1.Checked ? DataSet[i].PreLabel : DataSet[i].Label) == ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
                 {
                     DataSet[i].Draw(g, startX + position % lineWidth * stepXY, startY + position / lineWidth * stepXY, 1);
 
@@ -63,6 +63,7 @@ namespace MinesweeperBot
                             Math.Max(mouseDown.Y, mouseUp.Y) >= position / lineWidth)
                         {
                             DataSet[i].Label = ((string)(comboBox2.Items[comboBox2.SelectedIndex]))[0];
+                            if (checkBox1.Checked) DataSet[i].PreLabel = '?';
                             labelChanged = true;
                         }
                     }
@@ -122,6 +123,11 @@ namespace MinesweeperBot
                     mouseMoveScreen = new Point(-1, -1);
                 }
             }
+            Invalidate();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
             Invalidate();
         }
 

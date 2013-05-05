@@ -30,6 +30,28 @@ namespace MinesweeperBot
             return v.ToArray();
         }
 
+        public static string IntArrayToString(int[] v)
+        {
+            StringBuilder s = new StringBuilder();
+            foreach (var x in v) s.Append(x.ToString(System.Globalization.CultureInfo.InvariantCulture) + ";");
+            return s.ToString();
+        }
+
+        public static int[] StringToIntArray(string s)
+        {
+            var s2 = s.Split(';');
+            List<int> v = new List<int>();
+            foreach (var x_encoded in s2)
+            {
+                int x;
+                if (int.TryParse(x_encoded, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out x))
+                {
+                    v.Add(x);
+                }
+            }
+            return v.ToArray();
+        }
+
         public static string hash(string input)
         {
             var hashFunc = System.Security.Cryptography.SHA512.Create();

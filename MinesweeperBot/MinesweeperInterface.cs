@@ -172,8 +172,7 @@ namespace MinesweeperBot
                 }
             }
             
-            // create new data point for learning algorithm
-            
+            // create new data point for learning algorithm            
             double[] Features = new double[width * height];
             for (int x = 0; x < width; x++)
             {
@@ -186,10 +185,10 @@ namespace MinesweeperBot
                 }
             }
             char evaluation;
-            DataPoint p = new DataPoint(Features, '?', evaluation=SupervisedLearningAlgo.evaluateFunction(Features), '?');
+            DataPoint p = new DataPoint(Features, '?', evaluation = Storage.ANN.EvaluateFunction(Features), '?');
 
             // add datapoint to database
-            if (allowDataAdding && p.SaveToDatabase(Storage.SQLite))
+            if (allowDataAdding && !Storage.DataPoints.Contains(p))
             {
                 Storage.DataPoints.Add(p);
             }

@@ -48,11 +48,6 @@ namespace MinesweeperBot
             register(new KMeans());
         }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            register(new CentroidBatchLabel());
-        }
-
         private void button4_Click(object sender, EventArgs e)
         {
             register(new LabelData());
@@ -63,10 +58,5 @@ namespace MinesweeperBot
             register(new SupervisedLearningAlgo());            
         }
 
-        private void button6_Click(object sender, EventArgs e)
-        {
-            register(new SQLiteConsole());
-
-        }
     }
 }

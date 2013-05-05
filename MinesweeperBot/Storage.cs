@@ -14,9 +14,11 @@ namespace MinesweeperBot
     public class Storage
     {
         // new SQLite
-
-        public static List<DataPoint> DataPoints;
         public static SQLiteConnection SQLite = new SQLiteConnection("Data Source=" + Program.GetBasePath() + "\\db.sqlite" + ";Version=3;Compress=True;");
+
+        public static List<DataPoint> DataPoints = null;
+        public static ArtificialNeuralNetwork ANN = null;
+        
 
 
         // old XML
@@ -27,23 +29,23 @@ namespace MinesweeperBot
         public int[] TestSetMapping;
         public int DataPointDimensions { get { return DataPoints[0].Features.Length; } }
         public int CentroidCount = 30;
-        public string ClassificationSet;
+        //public string ClassificationSet;
         public CentroidSet CentroidSet;
-        public double learningRate = 0.0001;
-        public double[] NeuronalNetworkParameters;
+        //public double learningRate = 0.0001;
+        //public double[] NeuronalNetworkParameters;
 
-        [XmlIgnore]
-        public readonly int[] NeuronalNetworkConfiguration = new int[] { 256, 15, 11 };
+        //[XmlIgnore]
+        //public readonly int[] NeuronalNetworkConfiguration = new int[] { 256, 15, 11 };
 
 
         public static void Load( )
         {
             s = new Storage();
-
             DataPoints = new List<DataPoint>();
 
-
             SQLite.Open();
+            
+            // read datapoints
             var res = new SQLiteCommand("SELECT * FROM LabeledData", SQLite).ExecuteReader();
             while (res.Read())
             {
@@ -64,20 +66,42 @@ namespace MinesweeperBot
                 }
                 DataPoints.Add(new DataPoint(ID, Features, Label, PreLabel, Set));
             }
+
+            // read other serialized objects
+            res = new SQLiteCommand("SELECT * FROM Objects", SQLite).ExecuteReader();
+            while (res.Read())
+            {
+                string ID = "";
+                string Type = "";
+                string Data = "";
+
+                for (int i = 0; i < res.VisibleFieldCount; i++)
+                {
+                    switch (res.GetName(i))
+                    {
+                        case "ID": ID = res.GetString(i); break;
+                        case "Type": Type = res.GetString(i); break;
+                        case "Data": Data = res.GetString(i); break;
+                    }
+                }
+                if (Type == "ArtificialNeuralNetwork")
+                {
+                    Storage.ANN = new ArtificialNeuralNetwork();
+                    Storage.ANN.ID = ID;
+                    Storage.ANN.Deserialize(Data);
+                }
+            }
+
             SQLite.Close();
 
-
-            /*foreach (var item in s.DataSet)
+            if (Storage.ANN == null)
             {
-                string features = FormatHelper.DoubleArrayToString(item.Features,3);
-                string id = FormatHelper.hash(features);
-
-                DataPointDB p = new DataPointDB(id,features,item.Label,'?','?');
-                Storage.DataPoints.Add(p);
-            }*/
+                Storage.ANN = new ArtificialNeuralNetwork();
+                Storage.ANN.Init();
+            }
         }
 
-
+        /*
         public int NeuronalNetworkParameterCount
         {
             get
@@ -87,7 +111,7 @@ namespace MinesweeperBot
                     nnpCount += Storage.s.NeuronalNetworkConfiguration[i + 1] * (Storage.s.NeuronalNetworkConfiguration[i] + 1);
                 return nnpCount;
             }
-        }
+        }*/
 
         internal static void Save()
         {
@@ -96,11 +120,13 @@ namespace MinesweeperBot
 
             for (int i = 0; i < DataPoints.Count; i++)
             {
-                if (i == 5088)
-                {
-                }
-                DataPoints[i].SaveToDatabase(SQLite, false);
+                DataPoints[i].SaveToDatabase(SQLite);
             }
+
+
+            Storage.ANN.SaveToDatabase(SQLite);
+
+
 
             new SQLiteCommand("end", SQLite).ExecuteNonQuery(); 
             SQLite.Close();

@@ -117,7 +117,7 @@ namespace MinesweeperBot
             List<Point> unknowns = new List<Point>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
-                    if (Categorization[x, y] == 'x')
+                    if (Categorization[x, y] == 'x' || Categorization[x, y] == 'f')
                     {
                         Point p = new Point(x, y);
                         for (int i = 0; i < tuple.Length; i++)

@@ -69,7 +69,7 @@ namespace MinesweeperBot
     }*/
 
 
-    public class DataPoint
+    public class DataPoint : System.IEquatable<DataPoint>
     {
         double[] _features;
         public double[] Features { get { return _features; } }
@@ -77,34 +77,37 @@ namespace MinesweeperBot
         string _id;
         public string ID { get { return _id; } }
 
-        public char Label;
-        public char PreLabel;
+        char _label;
+        public char Label { get { return _label; } set { _label = value;  } }
+        char _prelabel;
+        public char PreLabel { get { return _prelabel; } set { _prelabel = value;  } }
 
         const int digits = 3;
 
+        char _set;
         /// <summary>
         /// t - trainings set
         /// v - cross validation set
-        /// e - test set
+        /// e - test set (evaluation)
         /// </summary>
-        public char Set;
+        public char Set { get { return _set; } set { _set = value;  } }
 
         public DataPoint(string id, string features, char label, char preLabel, char set)
         {
             _id = id;
             _features = FormatHelper.StringToDoubleArray(features);
-            Label = label;
-            PreLabel = preLabel;
-            Set = set;
+            _label = label;
+            _prelabel = preLabel;
+            _set = set;
         }
 
         public DataPoint(double[] features, char label, char preLabel, char set)
         {
             _features = features;
             _id = FormatHelper.hash(FormatHelper.DoubleArrayToString(_features, digits));
-            Label = label;
-            PreLabel = preLabel;
-            Set = set;
+            _label = label;
+            _prelabel = preLabel;
+            _set = set;
         }
 
         /// <summary>
@@ -112,13 +115,11 @@ namespace MinesweeperBot
         /// </summary>
         /// <param name="sqlite"></param>
         /// <returns>new entry => true, updated => false</returns>
-        public bool SaveToDatabase(SQLiteConnection sqlite, bool openCloseDB)
+        public bool SaveToDatabase(SQLiteConnection sqlite)
         {
-            if (openCloseDB) sqlite.Open();
-
 
             SQLiteCommand cmd = sqlite.CreateCommand();
-            cmd.CommandText = "SELECT COUNT(*) FROM LabeledData WHERE ID == @id";
+            cmd.CommandText = "SELECT COUNT(*) FROM LabeledData WHERE `ID` == @id";
             cmd.Parameters.Add(new SQLiteParameter("@id", ID));
             SQLiteDataReader reader = cmd.ExecuteReader();
             reader.Read();
@@ -127,21 +128,17 @@ namespace MinesweeperBot
             if (ID_exists)
             {
                 cmd = sqlite.CreateCommand();
-                cmd.CommandText = "UPDATE LabeledData SET 'Label' = @label, 'PreLabel' = @prelabel, 'Set' = @set WHERE 'ID' == @id";
+                cmd.CommandText = "UPDATE LabeledData SET `Label` = @label, `PreLabel` = @prelabel, `Set` = @set WHERE `ID` == @id";
                 cmd.Parameters.Add(new SQLiteParameter("@id", ID));
                 cmd.Parameters.Add(new SQLiteParameter("@label", Label.ToString()));
                 cmd.Parameters.Add(new SQLiteParameter("@prelabel", PreLabel.ToString()));
                 cmd.Parameters.Add(new SQLiteParameter("@set", Set.ToString()));
                 int count = cmd.ExecuteNonQuery();
-                if (count > 0)
-                {
-
-                }
             }
             else
             {
                 cmd = sqlite.CreateCommand();
-                cmd.CommandText = "INSERT INTO LabeledData('ID', 'Features', 'Label', 'PreLabel', 'Set') VALUES (@id, @features, @label, @prelabel, @set)";
+                cmd.CommandText = "INSERT INTO LabeledData(`ID`, `Features`, `Label`, `PreLabel`, `Set`) VALUES (@id, @features, @label, @prelabel, @set)";
                 cmd.Parameters.Add(new SQLiteParameter("@id", ID));
                 cmd.Parameters.Add(new SQLiteParameter("@features", FormatHelper.DoubleArrayToString(Features, digits)));
                 cmd.Parameters.Add(new SQLiteParameter("@label", Label.ToString()));
@@ -150,11 +147,11 @@ namespace MinesweeperBot
                 int count = cmd.ExecuteNonQuery();
             }
 
-            if (openCloseDB) sqlite.Close();
 
             return !ID_exists;
         }
-        public bool SaveToDatabase(SQLiteConnection sqlite) { return SaveToDatabase(sqlite, true); }
+        //public bool SaveToDatabase(SQLiteConnection sqlite) { return SaveToDatabase(sqlite, true); }
+        //public bool SaveToDatabase() { return SaveToDatabase(Storage.SQLite); }
 
         public void Draw(Graphics g, int offset_x, int offset_y, int scale)
         {
@@ -167,6 +164,40 @@ namespace MinesweeperBot
                         ));
                     g.FillRectangle(b, offset_x + scale * x, offset_y + scale * y, scale, scale);
                 }
+        }
+
+
+        public bool Equals(DataPoint other)
+        {
+            return this.Equals((object)other);
+        }
+
+        public override bool Equals(object obj)
+        {
+            DataPoint d2 = obj as DataPoint;
+            if (d2 == null) return false;
+
+            bool equals = true;
+            for (int n = 0; n < Features.Length; n++)
+            {
+                if (d2.Features[n] != this.Features[n])
+                {
+                    equals = false;
+                    break;
+                }
+            }
+            return equals;
+        }
+
+        public override int GetHashCode()
+        {
+            var s = FormatHelper.DoubleArrayToString(_features, digits);
+            int res = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                res ^= ((int)s[i]) << ((i * 8) % 32);
+            }
+            return res;
         }
     }
 }

@@ -9,7 +9,6 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\MathNet
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\MathNet.Numerics.FSharp.xml
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\MathNet.Numerics.IO.xml
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\ResolveAssemblyReference.cache
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.CentroidBatchLabel.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.KMeans.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.LabelData.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.Main.resources
@@ -21,4 +20,3 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\Gen
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.exe
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.pdb
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\MinesweeperBot.exe.config
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.SQLiteConsole.resources
