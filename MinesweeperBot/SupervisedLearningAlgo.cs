@@ -48,6 +48,7 @@ namespace MinesweeperBot
                 runOptimization = true;
                 button4.Text = "Stop Optimization";
                 workerThread = new Thread(new ThreadStart(RunLoop));
+                workerThread.Priority = ThreadPriority.Lowest;
                 workerThread.Start();
             }
             

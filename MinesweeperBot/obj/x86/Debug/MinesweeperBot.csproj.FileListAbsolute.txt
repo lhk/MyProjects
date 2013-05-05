@@ -33,7 +33,6 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MathNet.N
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MathNet.Numerics.FSharp.xml
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MathNet.Numerics.IO.xml
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\ResolveAssemblyReference.cache
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.CentroidBatchLabel.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.KMeans.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.LabelData.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.Main.resources
@@ -42,5 +41,4 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\Mines
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SupervisedLearningAlgo.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.read.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.write.1.tlog
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SQLiteConsole.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MinesweeperBot.exe.config

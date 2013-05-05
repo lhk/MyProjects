@@ -9,6 +9,8 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.Data.SQLite;
 using System.Data;
+using MathNet.Numerics.LinearAlgebra.Generic;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace MinesweeperBot
 {
@@ -199,5 +201,12 @@ namespace MinesweeperBot
             }
             return res;
         }
+
+        /*Vector<double> ReducedFeatures = null;
+        public Vector<double> GetReducedFeatures()
+        {
+            if (ReducedFeatures == null) ReducedFeatures = Storage.PCA.EvaluateFunction(new DenseVector(Features));
+            return ReducedFeatures;
+        }*/
     }
 }

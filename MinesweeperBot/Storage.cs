@@ -18,6 +18,8 @@ namespace MinesweeperBot
 
         public static List<DataPoint> DataPoints = null;
         public static ArtificialNeuralNetwork ANN = null;
+        public static PrincipalComponentAnalysis PCA = null;
+
         
 
 
@@ -84,11 +86,17 @@ namespace MinesweeperBot
                         case "Data": Data = res.GetString(i); break;
                     }
                 }
-                if (Type == "ArtificialNeuralNetwork")
+                if (Type == "ArtificialNeuralNetwork" && ID != "yIllnnOBmYHf")
                 {
                     Storage.ANN = new ArtificialNeuralNetwork();
                     Storage.ANN.ID = ID;
                     Storage.ANN.Deserialize(Data);
+                }
+                else if (Type == "PrincipalComponentAnalysis")
+                {
+                    Storage.PCA = new PrincipalComponentAnalysis();
+                    Storage.PCA.ID = ID;
+                    Storage.PCA.Deserialize(Data);
                 }
             }
 
@@ -99,21 +107,15 @@ namespace MinesweeperBot
                 Storage.ANN = new ArtificialNeuralNetwork();
                 Storage.ANN.Init();
             }
+            if (Storage.PCA == null)
+            {
+                Storage.PCA = new PrincipalComponentAnalysis();
+                Storage.PCA.PCASetup();
+            }
         }
 
-        /*
-        public int NeuronalNetworkParameterCount
-        {
-            get
-            {
-                int nnpCount = 0;
-                for (int i = 0; i < Storage.s.NeuronalNetworkConfiguration.Length - 1; i++)
-                    nnpCount += Storage.s.NeuronalNetworkConfiguration[i + 1] * (Storage.s.NeuronalNetworkConfiguration[i] + 1);
-                return nnpCount;
-            }
-        }*/
 
-        internal static void Save()
+        public static void Save()
         {
             SQLite.Open();
             new SQLiteCommand("begin", SQLite).ExecuteNonQuery();
@@ -125,6 +127,7 @@ namespace MinesweeperBot
 
 
             Storage.ANN.SaveToDatabase(SQLite);
+            Storage.PCA.SaveToDatabase(SQLite);
 
 
 

@@ -93,15 +93,17 @@ namespace MinesweeperBot
 
         public void Init()
         {
-            LearningRate = 1e-11;
-            OutputSet = "01234567xf";
-            Configuration = new[] { Storage.DataPoints[0].Features.Length, 10, OutputSet.Length };
+            LearningRate = 1e-2;
+            OutputSet = "01234567f";
+            //Configuration = new[] { Storage.DataPoints[0].Features.Length, 10, OutputSet.Length };
+            Configuration = new[] { 256, 11, OutputSet.Length };
             Parameters = new double[GetParameterCountFromConfiguration()];
             for (int i = 0; i < Parameters.Length; i++)
             {
                 Parameters[i] = (GenuineRandomGenerator.GetDouble() - .5) * LearningRate;
             }
-            ID = FormatHelper.hash(Serialize());
+            CalcOutputErrorWeights();
+            GradientApprox = new double[Parameters.Length];
         }
 
 
@@ -126,6 +128,7 @@ namespace MinesweeperBot
         private Vector<double> forwardProp(double[] _Parameters, Vector<double> input)
         {
             input = normalizeIput(input);
+
             int parameterListIndex = 0;
             for (int i = 0; i < Configuration.Length - 1; i++)
             {
@@ -265,7 +268,7 @@ namespace MinesweeperBot
                     Parameters = ParametersPlus;
                     currentError = errorPlus;
                     for (int i = 0; i < Parameters.Length; i++)
-                        GradientApprox[i] = (GradientApprox[i] * 10.0 + Step[i]) / 11.0;
+                        GradientApprox[i] = (GradientApprox[i] * 5.0 + Step[i]) / 6.0;
 
                 }
                 else if (errorMinus < currentError)
@@ -273,11 +276,11 @@ namespace MinesweeperBot
                     Parameters = ParametersMinus;
                     currentError = errorMinus;
                     for (int i = 0; i < Parameters.Length; i++)
-                        GradientApprox[i] = (GradientApprox[i] * 10.0 - Step[i]) / 11.0;
+                        GradientApprox[i] = (GradientApprox[i] * 5.0 - Step[i]) / 6.0;
                 }
             }
             else for (int i = 0; i < Parameters.Length; i++)
-                    GradientApprox[i] *= .95;
+                    GradientApprox[i] *= .6;
 
             return currentError;
         }
