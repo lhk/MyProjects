@@ -208,5 +208,26 @@ namespace MinesweeperBot
             if (ReducedFeatures == null) ReducedFeatures = Storage.PCA.EvaluateFunction(new DenseVector(Features));
             return ReducedFeatures;
         }*/
+
+        public static Vector<double> Preprocess(double[] features)
+        {
+            Vector<double> output = new DenseVector(features.Length);
+            double min = double.MaxValue, max = double.MinValue, mean = 0;
+            for (int i = 0; i < features.Length; i++)
+            {
+                min = Math.Min(min, features[i]);
+                max = Math.Max(max, features[i]);
+                mean += features[i];
+            }
+            mean /= features.Length;
+
+            if (max == min) max += 1e-8;
+
+            for (int i = 0; i < features.Length; i++)
+            {
+                output[i] = (features[i] - mean) / (max - min);
+            }
+            return output;
+        }
     }
 }

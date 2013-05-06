@@ -59,6 +59,13 @@ namespace MinesweeperBot
             while (runOptimization)
             {
                 double cost = Storage.ANN.OptimizationStep();
+                /*var gradient = Storage.ANN.ComputeGradient();
+                for (int i = 0; i < Storage.ANN.Parameters.Length; i++)
+                {
+                    Storage.ANN.Parameters[i] -= gradient[i] * Storage.ANN.LearningRate;
+                }
+
+                double cost = Storage.ANN.overallError(Storage.ANN.Parameters);*/
 
                 try
                 {
