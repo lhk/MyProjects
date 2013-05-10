@@ -83,10 +83,7 @@ namespace MinesweeperBot
 
         private static bool AllTrue(bool[] pointIsConnected)
         {
-            foreach (var item in pointIsConnected)
-            {
-                if (!item) return false;
-            }
+            foreach (var item in pointIsConnected)if (!item) return false;
             return true;
         }
 

@@ -149,5 +149,18 @@ namespace MinesweeperBot
             Invalidate();
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < Storage.DataPoints.Count; i++)
+            {
+                Storage.DataPoints[i].Label = Storage.ANN.EvaluateFunction(Storage.DataPoints[i].Features, (double)numericUpDown1.Value);
+            }
+        }
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            Invalidate();
+        }
+
     }
 }

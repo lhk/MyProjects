@@ -26,6 +26,7 @@ namespace MinesweeperBot
             WindowState = FormWindowState.Maximized;
             Storage.Load();
             _Main = this;
+
         }
 
         private void Main_FormClosed(object sender, FormClosedEventArgs e)
@@ -43,11 +44,6 @@ namespace MinesweeperBot
             register(new MinesweeperInterface());
         }      
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            register(new KMeans());
-        }
-
         private void button4_Click(object sender, EventArgs e)
         {
             register(new LabelData());
@@ -55,7 +51,7 @@ namespace MinesweeperBot
 
         private void button5_Click(object sender, EventArgs e)
         {
-            register(new SupervisedLearningAlgo());            
+            register(new SupervisedLearning());            
         }
 
     }

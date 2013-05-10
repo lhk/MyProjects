@@ -15,12 +15,12 @@ namespace MinesweeperBot
         public double LearningRate;
         public int[] Configuration;
         public string OutputSet;
-        public Vector<double> Parameters;
-        public Queue<Vector<double>> GradientHistory;
-        public Vector<double> LastGradient;
+        public double[] Parameters;
+        //public Queue<Vector<double>> GradientHistory;
+        //public Vector<double> LastGradient;
 
 
-        Matrix<double>[] ParametersToWeightMatricies(Vector<double> _Parameters)
+        Matrix<double>[] ParametersToWeightMatricies(double[] _Parameters)
         {
             // transform parameter list to weight matricies
             Matrix<double>[] res = new Matrix<double>[Configuration.Length - 1];
@@ -41,8 +41,8 @@ namespace MinesweeperBot
             return res;
         }
 
-        Vector<double> bestParameters;
-        double bestParametersScore = double.MaxValue;
+        //Vector<double> bestParameters;
+        //double bestParametersScore = double.MaxValue;
 
         public ArtificialNeuralNetwork()
         {
@@ -69,14 +69,14 @@ namespace MinesweeperBot
             if (s2.Length >= 4)
             {
                 Configuration = FormatHelper.StringToIntArray(s2[1]);
-                Parameters = new DenseVector(FormatHelper.StringToDoubleArray(s2[0]));
+                Parameters = /*new DenseVector*/(FormatHelper.StringToDoubleArray(s2[0]));
                 LearningRate = FormatHelper.StringToDoubleArray(s2[2])[0];
                 OutputSet = s2[3];
-                bestParametersScore = double.MaxValue;
+                //bestParametersScore = double.MaxValue;
 
-                if (GetParameterCountFromConfiguration() != Parameters.Count) throw new Exception("Nerwork Configuration and Parameterlist don't match.");
+                if (GetParameterCountFromConfiguration() != Parameters.Length) throw new Exception("Nerwork Configuration and Parameterlist don't match.");
                 if (Configuration[Configuration.Length - 1] != OutputSet.Length) throw new Exception("Nerwork Configuration and Output Set don't match.");
-                GradientHistory = new Queue<Vector<double>>();
+                //GradientHistory = new Queue<Vector<double>>();
             }
             else throw new Exception("Invalid DB Data");
         }
@@ -87,14 +87,14 @@ namespace MinesweeperBot
             OutputSet = "01234567f";
             Configuration = new int[] { 144, 14, OutputSet.Length };
             LearningRate = .1;
-            Parameters = new DenseVector(GetParameterCountFromConfiguration());
-            for (int i = 0; i < Parameters.Count; i++)
+            Parameters = /*new DenseVector*/new double[(GetParameterCountFromConfiguration())];
+            for (int i = 0; i < Parameters.Length; i++)
             {
                 Parameters[i] = (GenuineRandomGenerator.GetDouble() - .5) * 10;
             }
-            bestParametersScore = double.MaxValue;
-            bestParameters = null;
-            GradientHistory = new Queue<Vector<double>>();
+            //bestParametersScore = double.MaxValue;
+            //bestParameters = null;
+            //GradientHistory = new Queue<Vector<double>>();
         }
 
         public int GetParameterCountFromConfiguration()
@@ -115,7 +115,7 @@ namespace MinesweeperBot
             for (int i = 0; i < Storage.DataPoints.Count; i++)
                 if (OutputSet.Contains(Storage.DataPoints[i].Label))
                 {
-                    if (Storage.DataPoints[i].Label == EvaluateFunction(ParametersToWeightMatricies(Parameters), Storage.DataPoints[i].Features))
+                    if (Storage.DataPoints[i].Label == EvaluateFunction(ParametersToWeightMatricies(Parameters), Storage.DataPoints[i].Features, .5))
                         rightCounter++;
                     else
                     {
@@ -130,9 +130,9 @@ namespace MinesweeperBot
             return (rightCounter) / (rightCounter + wrongCounter);
         }
 
-        public char EvaluateFunction(double[] features) { return EvaluateFunction(ParametersToWeightMatricies(Parameters), features); }
+        public char EvaluateFunction(double[] features, double certaintyBoundary) { return EvaluateFunction(ParametersToWeightMatricies(Parameters), features, certaintyBoundary); }
 
-        public char EvaluateFunction(Matrix<double>[] capitalTheta, double[] features)
+        public char EvaluateFunction(Matrix<double>[] capitalTheta, double[] features, double certaintyBoundary)
         {
             Vector<double>[] a;
 
@@ -151,7 +151,7 @@ namespace MinesweeperBot
                     outputLabelIndex = j;
                 }
             }
-            //if (highestProbability < .3) return '?';
+            if (highestProbability < certaintyBoundary) return '?';
             return OutputSet[outputLabelIndex];
         }
 
@@ -161,7 +161,7 @@ namespace MinesweeperBot
             double epsg = 0;
             double epsf = 0;
             double epsx = 0;
-            int maxits = 20;
+            int maxits = 10;
             alglib.minlbfgsstate state;
             alglib.minlbfgsreport rep;
 
@@ -169,14 +169,14 @@ namespace MinesweeperBot
             alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
             alglib.minlbfgsoptimize(state, LBFGS_Func_Grad_Wrapper, null, obj);
             alglib.minlbfgsresults(state, out x, out rep);
-            Parameters = new DenseVector(x);
+            Parameters = x;
         }
 
         void LBFGS_Func_Grad_Wrapper(double[] x, ref double func, double[] grad, object obj)
         {
             Vector<double> Gradient;
             double Error;
-            ComputeGradientAndError(new DenseVector(x), out Gradient, out Error);
+            ComputeGradientAndError(x, out Gradient, out Error);
 
             func = Error;
             for (int i = 0; i < grad.Length && i < Gradient.Count; i++)
@@ -184,7 +184,7 @@ namespace MinesweeperBot
                 grad[i] = Gradient[i];
             }
 
-            SupervisedLearningAlgo f = (SupervisedLearningAlgo)obj;
+            SupervisedLearning f = (SupervisedLearning)obj;
             f.LogError(Error);
         }
 
@@ -234,14 +234,14 @@ namespace MinesweeperBot
         }*/
 
         // backprop algorithm
-        public void ComputeGradientAndError(Vector<double> _Parameters, out Vector<double> Gradient, out double _Error)
+        public void ComputeGradientAndError(double[] _Parameters, out Vector<double> Gradient, out double _Error)
         {
             Matrix<double>[] capitalDelta = new Matrix<double>[Configuration.Length - 1];
             var capitalTheta = ParametersToWeightMatricies(_Parameters);
 
             // init capitalDelta matricies
             for (int l = 0; l < capitalDelta.Length; l++)
-                capitalDelta[l] = new DenseMatrix(capitalTheta[l].RowCount, capitalTheta[l].ColumnCount, 0);
+                capitalDelta[l] = DenseMatrix.Create(capitalTheta[l].RowCount, capitalTheta[l].ColumnCount, (row, col) => { return 0; });
 
 
             int DataPointCount = 0;
@@ -306,7 +306,7 @@ namespace MinesweeperBot
 
 
             // transform back
-            Gradient = new DenseVector(Parameters.Count);
+            Gradient = new DenseVector(Parameters.Length);
             {
                 int parameterListIndex = 0;
                 for (int i = 0; i < Configuration.Length - 1; i++)

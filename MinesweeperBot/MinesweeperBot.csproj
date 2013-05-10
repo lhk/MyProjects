@@ -64,9 +64,6 @@
     <Reference Include="MathNet.Numerics.IO">
       <HintPath>thirdPartyLibs\MathNet.Numerics.IO.dll</HintPath>
     </Reference>
-    <Reference Include="SQLite.Designer">
-      <HintPath>..\..\..\..\..\..\Program Files\System.Data.SQLite\2010\bin\SQLite.Designer.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.85.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
@@ -85,18 +82,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArtificialNeuralNetwork.cs" />
-    <Compile Include="CentroidSet.cs" />
     <Compile Include="DataPoint.cs" />
     <Compile Include="FormatHelper.cs" />
     <Compile Include="GameSolver.cs" />
+    <Compile Include="GameSolver2.cs" />
     <Compile Include="GenuineRandomGenerator.cs" />
     <Compile Include="DBObject.cs" />
-    <Compile Include="KMeans.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="KMeans.Designer.cs">
-      <DependentUpon>KMeans.cs</DependentUpon>
-    </Compile>
     <Compile Include="LabelData.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,22 +106,18 @@
     <Compile Include="MinesweeperInterface.Designer.cs">
       <DependentUpon>MinesweeperInterface.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObjectDumper.cs" />
     <Compile Include="Preprocessor.cs" />
     <Compile Include="PrincipalComponentAnalysis.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RECT.cs" />
     <Compile Include="Storage.cs" />
-    <Compile Include="SupervisedLearningAlgo.cs">
+    <Compile Include="SupervisedLearning.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SupervisedLearningAlgo.Designer.cs">
-      <DependentUpon>SupervisedLearningAlgo.cs</DependentUpon>
+    <Compile Include="SupervisedLearning.Designer.cs">
+      <DependentUpon>SupervisedLearning.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="KMeans.resx">
-      <DependentUpon>KMeans.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="LabelData.resx">
       <DependentUpon>LabelData.cs</DependentUpon>
     </EmbeddedResource>
@@ -149,8 +136,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="SupervisedLearningAlgo.resx">
-      <DependentUpon>SupervisedLearningAlgo.cs</DependentUpon>
+    <EmbeddedResource Include="SupervisedLearning.resx">
+      <DependentUpon>SupervisedLearning.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />
     <None Include="Properties\Settings.settings">

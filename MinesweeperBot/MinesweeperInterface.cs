@@ -29,6 +29,7 @@ namespace MinesweeperBot
         /// </summary>
         Point nextClick = new Point(-2,-2);
         Point lastClick = new Point(-2, -2);
+        GameSolver2 gamesolver = new GameSolver2();
 
         public MinesweeperInterface()
         {
@@ -51,23 +52,57 @@ namespace MinesweeperBot
                 {
                     differencesArray = Differences(screenshotByteArray, defaultImageByteArray);
                     Categorization = CategorizeField();
+                    
 
                     if (GetKeyState(0x2E) < 0)
                     {
-                        nextClick = GameSolver.FindNextClick(Categorization, lastClick);
+                        //nextClick = GameSolver.FindNextClick(Categorization, lastClick);
+                        gamesolver.Analyze(Categorization);
 
-                        if (nextClick.X >= 0 && GetTopWindowText() == "Minesweeper")
+                        if (/*nextClick.X >= 0 && */GetTopWindowText() == "Minesweeper")
                         {
                             RECT rect;
                             if (GetWindowRect(new HandleRef(this, GetForegroundWindow()), out rect))
                             {
                                 Rectangle bounds = new Rectangle(rect.Left + 39, rect.Top + 81, rect.Width - 39 - 37, rect.Height - 81 - 40);
-                                SetCursorPos(bounds.X + nextClick.X * 18 + 5, bounds.Y + nextClick.Y * 18 + 5);
+                                foreach (var freeField in gamesolver.knownFreeFields)
+                                {
+                                    if (Categorization[freeField.X, freeField.Y] == 'x' || Categorization[freeField.X, freeField.Y] == 'f')
+                                    {
+                                        SetCursorPos(bounds.X + freeField.X * 18 + 5, bounds.Y + freeField.Y * 18 + 5);
+                                        mouse_event(MOUSEEVENTF_LEFTDOWN,
+                                            (uint)(bounds.X + freeField.X * 18 + 5),
+                                            (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
+                                        Thread.Sleep(5);
+                                        mouse_event( MOUSEEVENTF_LEFTUP,
+                                            (uint)(bounds.X + freeField.X * 18 + 5),
+                                            (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
+                                        Thread.Sleep(20);
+                                    }
+                                }
+
+                                /*foreach (var freeField in gamesolver.knownMinedFields)
+                                {
+                                    if (Categorization[freeField.X, freeField.Y] == 'x')
+                                    {
+                                        SetCursorPos(bounds.X + freeField.X * 18 + 5, bounds.Y + freeField.Y * 18 + 5);
+                                        mouse_event(MOUSEEVENTF_RIGHTDOWN,
+                                            (uint)(bounds.X + freeField.X * 18 + 5),
+                                            (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
+                                        Thread.Sleep(5);
+                                        mouse_event(MOUSEEVENTF_RIGHTUP,
+                                            (uint)(bounds.X + freeField.X * 18 + 5),
+                                            (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
+                                        Thread.Sleep(20);
+                                    }
+                                }*/
+                                
+                                /*SetCursorPos(bounds.X + nextClick.X * 18 + 5, bounds.Y + nextClick.Y * 18 + 5);
                                 mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,
                                     (uint)(bounds.X + nextClick.X * 18 + 5),
-                                    (uint)(bounds.Y + nextClick.Y * 18 + 5), 0, 0);
+                                    (uint)(bounds.Y + nextClick.Y * 18 + 5), 0, 0);*/
                             }
-                            lastClick = nextClick;
+                            //lastClick = nextClick;
                         }
                     }
                 }
@@ -128,11 +163,23 @@ namespace MinesweeperBot
                     {
                         g.DrawString("No Click-Point found.", new Font("Arial", 20), new SolidBrush(Color.Red), 50, 750);
                     }
+
+                    foreach (var freeField in gamesolver.knownFreeFields)
+                    {
+                        int radius = 6;
+                        g.DrawEllipse(new Pen(Color.LightGreen, 3), 18 * freeField.X + 46 - 25, 18 * freeField.Y + 350, radius * 2, radius * 2);
+                    }
+                    foreach (var mine in gamesolver.knownMinedFields)
+                    {
+                        int radius = 6;
+                        g.DrawEllipse(new Pen(Color.Red, 3), 18 * mine.X + 46 - 25, 18 * mine.Y + 350, radius * 2, radius * 2);
+                    }
                 }
                 else
                 {
                     g.DrawLine(new Pen(Color.Red, 3), 10, 10, 100, 100);
                     g.DrawLine(new Pen(Color.Red, 3), 10, 100, 100, 10);
+                    gamesolver = new GameSolver2();
                 }
             }
             catch (Exception ex)
@@ -187,7 +234,7 @@ namespace MinesweeperBot
                 }
             }
             char evaluation;
-            DataPoint p = new DataPoint(Features, '?', evaluation = Storage.ANN.EvaluateFunction(Features), '?');
+            DataPoint p = new DataPoint(Features, '?', evaluation = Storage.ANN.EvaluateFunction(Features, .5), 't');
 
             // add datapoint to database
             if (allowDataAdding && !Storage.DataPoints.Contains(p))

@@ -9,14 +9,6 @@ namespace MinesweeperBot
 {
     public class Preprocessor
     {
-        public Vector<double> Mean;
-        public Vector<double> Std;
-
-        public Preprocessor()
-        {
-            //SetupFeatureRegularization();
-        }
-
         public Vector<double> FeatureRegularization(Vector<double> vector)
         {
             List<double> output = new List<double>();
@@ -29,26 +21,6 @@ namespace MinesweeperBot
             }
 
             return new DenseVector(output.ToArray());
-        }
-
-        public void SetupFeatureRegularization()
-        {
-            Mean = new DenseVector(Storage.DataPoints[0].Features.Length,0);
-            Std = new DenseVector(Storage.DataPoints[0].Features.Length,0);
-
-            for (int i = 0; i < Storage.DataPoints.Count; i++)
-                for (int j = 0; j < Mean.Count; j++)
-                    Mean[j] += Storage.DataPoints[i].Features[j];
-
-            for (int j = 0; j < Mean.Count; j++)
-                Mean[j] /= Storage.DataPoints.Count;
-
-            for (int i = 0; i < Storage.DataPoints.Count; i++)
-                for (int j = 0; j < Mean.Count; j++)
-                    Std[j] += (Storage.DataPoints[i].Features[j] - Mean[j]) * (Storage.DataPoints[i].Features[j] - Mean[j]);
-
-            for (int j = 0; j < Mean.Count; j++)
-                Std[j] = Math.Sqrt(Std[j] / (Storage.DataPoints.Count - 1));
         }
     }
 }

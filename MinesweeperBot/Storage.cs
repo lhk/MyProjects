@@ -20,29 +20,9 @@ namespace MinesweeperBot
         public static ArtificialNeuralNetwork ANN = null;
         public static PrincipalComponentAnalysis PCA = null;
         public static Preprocessor Preprocessor;
-        
-
-
-        // old XML
-        public static Storage s;
-
-        //public List<DataPoint> DataSet;
-        public int[] TrainingSetMapping;
-        public int[] TestSetMapping;
-        public int DataPointDimensions { get { return DataPoints[0].Features.Length; } }
-        public int CentroidCount = 30;
-        //public string ClassificationSet;
-        public CentroidSet CentroidSet;
-        //public double learningRate = 0.0001;
-        //public double[] NeuronalNetworkParameters;
-
-        //[XmlIgnore]
-        //public readonly int[] NeuronalNetworkConfiguration = new int[] { 256, 15, 11 };
-
 
         public static void Load( )
         {
-            s = new Storage();
             DataPoints = new List<DataPoint>();
 
             SQLite.Open();
@@ -119,22 +99,28 @@ namespace MinesweeperBot
 
         public static void Save()
         {
-            SQLite.Open();
-            new SQLiteCommand("begin", SQLite).ExecuteNonQuery();
-
-            for (int i = 0; i < DataPoints.Count; i++)
+            try
             {
-                DataPoints[i].SaveToDatabase(SQLite);
+                SQLite.Open();
+                new SQLiteCommand("begin", SQLite).ExecuteNonQuery();
+
+                for (int i = 0; i < DataPoints.Count; i++)
+                {
+                    DataPoints[i].SaveToDatabase(SQLite);
+                }
+
+                Storage.ANN.SaveToDatabase(SQLite);
+                //Storage.PCA.SaveToDatabase(SQLite);
+
+
+                //new SQLiteCommand("DELETE FROM LabeledData WHERE `Label` == 'j'", SQLite).ExecuteReader();
+                new SQLiteCommand("end", SQLite).ExecuteNonQuery();
+                SQLite.Close();
             }
-
-
-            Storage.ANN.SaveToDatabase(SQLite);
-            //Storage.PCA.SaveToDatabase(SQLite);
-
-
-            new SQLiteCommand("DELETE FROM LabeledData WHERE `Label` == 'j'", SQLite).ExecuteReader();
-            new SQLiteCommand("end", SQLite).ExecuteNonQuery(); 
-            SQLite.Close();
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + "\n\n" + e.StackTrace);
+            }
         }
     }
 }

@@ -1,10 +1,8 @@
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MinesweeperBot.exe.config
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\ResolveAssemblyReference.cache
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.KMeans.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.LabelData.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.Main.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.MinesweeperInterface.resources
-C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SupervisedLearningAlgo.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.read.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.write.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MinesweeperBot.exe
@@ -17,3 +15,4 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MathNet.N
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.Properties.Resources.resources
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.exe
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.pdb
+C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\MinesweeperBot.SupervisedLearning.resources
