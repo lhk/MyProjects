@@ -50,19 +50,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="alglibnet2">
-      <HintPath>D:\Desktop\alglib-3.7.0.csharp\csharp\alglibnet2.dll</HintPath>
+      <HintPath>thirdPartyLibs\alglibnet2.dll</HintPath>
     </Reference>
     <Reference Include="Fast Bitmap Beta">
-      <HintPath>Fast Bitmap Beta\Fast Bitmap Beta.dll</HintPath>
+      <HintPath>thirdPartyLibs\Fast Bitmap Beta.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics">
-      <HintPath>MathNet.Numerics-2.5.0.27\Net40\MathNet.Numerics.dll</HintPath>
+      <HintPath>thirdPartyLibs\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.FSharp">
-      <HintPath>MathNet.Numerics-2.5.0.27\Net40\MathNet.Numerics.FSharp.dll</HintPath>
+      <HintPath>thirdPartyLibs\MathNet.Numerics.FSharp.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.IO">
-      <HintPath>MathNet.Numerics-2.5.0.27\Net40\MathNet.Numerics.IO.dll</HintPath>
+      <HintPath>thirdPartyLibs\MathNet.Numerics.IO.dll</HintPath>
     </Reference>
     <Reference Include="SQLite.Designer">
       <HintPath>..\..\..\..\..\..\Program Files\System.Data.SQLite\2010\bin\SQLite.Designer.dll</HintPath>
