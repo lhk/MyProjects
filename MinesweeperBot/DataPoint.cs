@@ -14,67 +14,13 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace MinesweeperBot
 {
-    /*public class DataPoint : System.IEquatable<DataPoint>
-    {
-        public double[] Features { get; set; }
-
-        public char Label = '?';
-
-
-        public bool Equals(DataPoint other)
-        {
-            return this.Equals((object)other);
-        }
-
-        public override bool Equals(object obj)
-        {
-            DataPoint d2 = obj as DataPoint;
-            if (d2 == null) return false;
-
-            bool equals = true;
-            for (int n = 0; n < Features.Length; n++)
-            {
-                if (d2.Features[n] != this.Features[n])
-                {
-                    equals = false;
-                    break;
-                }
-            }
-            return equals;
-        }
-
-        public override int GetHashCode()
-        {
-
-            double sum = 0;
-            for (int n = 0; n < Features.Length; n++)
-            {
-                double x = Math.Abs(Features[n]) + 1;
-                sum += 100 * x / Math.Pow(10, Math.Floor(Math.Log10(x)));
-            }
-
-            return (int)sum;
-        }
-
-        internal void Draw(Graphics g, int offset_x, int offset_y, int scale)
-        {
-            for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++)
-                {
-                    Brush b = new SolidBrush(Color.FromArgb(
-                        (int)(Features[x * 16 + y] / 3),
-                        (int)(Features[x * 16 + y] / 3),
-                        (int)(Features[x * 16 + y] / 3)
-                        ));
-                    g.FillRectangle(b, offset_x + scale * x, offset_y + scale * y, scale, scale);
-                }
-        }
-    }*/
-
-
     public class DataPoint : System.IEquatable<DataPoint>
     {
         double[] _features;
-        public double[] Features { get { return _features; } }
+        public double[] Features
+        {
+            get { return _features; }
+        }
 
         string _id;
         public string ID { get { return _id; } }
@@ -152,22 +98,24 @@ namespace MinesweeperBot
 
             return !ID_exists;
         }
-        //public bool SaveToDatabase(SQLiteConnection sqlite) { return SaveToDatabase(sqlite, true); }
-        //public bool SaveToDatabase() { return SaveToDatabase(Storage.SQLite); }
 
-        public void Draw(Graphics g, int offset_x, int offset_y, int scale)
+        Bitmap drawCache = null;
+        public void Draw(Graphics g, int offset_x, int offset_y)
         {
-            for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++)
-                {
-                    Brush b = new SolidBrush(Color.FromArgb(
-                        (int)(Features[x * 16 + y] / 3),
-                        (int)(Features[x * 16 + y] / 3),
-                        (int)(Features[x * 16 + y] / 3)
-                        ));
-                    g.FillRectangle(b, offset_x + scale * x, offset_y + scale * y, scale, scale);
-                }
-        }
+            if (drawCache == null)
+            {
+                drawCache = new Bitmap(16, 16);
+                var g2 = Graphics.FromImage(drawCache);
+                for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++)
+                    {
+                        int greyScale = (int)(Features[x * 16 + y] / 3);
+                        Brush b = new SolidBrush(Color.FromArgb(greyScale, greyScale, greyScale));
+                        g2.FillRectangle(b, x, y, 1, 1);
+                    }
+            }
+            g.DrawImage(drawCache, offset_x, offset_y);
 
+        }
 
         public bool Equals(DataPoint other)
         {
@@ -176,58 +124,19 @@ namespace MinesweeperBot
 
         public override bool Equals(object obj)
         {
-            DataPoint d2 = obj as DataPoint;
-            if (d2 == null) return false;
-
-            bool equals = true;
-            for (int n = 0; n < Features.Length; n++)
-            {
-                if (d2.Features[n] != this.Features[n])
-                {
-                    equals = false;
-                    break;
-                }
-            }
-            return equals;
+            return
+                this.ID == ((DataPoint)obj).ID;
         }
 
         public override int GetHashCode()
         {
-            var s = FormatHelper.DoubleArrayToString(_features, digits);
+            var s = ID;
             int res = 0;
             for (int i = 0; i < s.Length; i++)
             {
                 res ^= ((int)s[i]) << ((i * 8) % 32);
             }
             return res;
-        }
-
-        /*Vector<double> ReducedFeatures = null;
-        public Vector<double> GetReducedFeatures()
-        {
-            if (ReducedFeatures == null) ReducedFeatures = Storage.PCA.EvaluateFunction(new DenseVector(Features));
-            return ReducedFeatures;
-        }*/
-
-        public static Vector<double> Preprocess(double[] features)
-        {
-            Vector<double> output = new DenseVector(features.Length);
-            double min = double.MaxValue, max = double.MinValue, mean = 0;
-            for (int i = 0; i < features.Length; i++)
-            {
-                min = Math.Min(min, features[i]);
-                max = Math.Max(max, features[i]);
-                mean += features[i];
-            }
-            mean /= features.Length;
-
-            if (max == min) max += 1e-8;
-
-            for (int i = 0; i < features.Length; i++)
-            {
-                output[i] = (features[i] - mean) / (max - min);
-            }
-            return output;
         }
     }
 }

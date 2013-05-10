@@ -171,7 +171,9 @@ namespace MinesweeperBot
                     return 'x'; 
                 }
             }
-            
+
+            //return '0';
+
             // create new data point for learning algorithm            
             double[] Features = new double[width * height];
             for (int x = 0; x < width; x++)

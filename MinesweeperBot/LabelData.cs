@@ -25,9 +25,27 @@ namespace MinesweeperBot
             InitializeComponent();
             WindowState = FormWindowState.Maximized;
             DoubleBuffered = true;
+            string[] labels = new string[] 
+            {
+                "? (unlabeled)",
+                "j (junk)",
+                "f (flag)",
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7"
+            };
+            comboBox1.Items.Clear();
             comboBox2.Items.Clear();
-            foreach (var item in comboBox1.Items)
+            foreach (var item in labels)
+            {
+                comboBox1.Items.Add(item);
                 comboBox2.Items.Add(item);
+            }
 
             comboBox1.SelectedIndex = comboBox2.SelectedIndex = 0;
         }
@@ -50,7 +68,7 @@ namespace MinesweeperBot
             {
                 if (comboBox1.SelectedIndex >= 0 && (checkBox1.Checked ? DataSet[i].PreLabel : DataSet[i].Label) == ((string)(comboBox1.Items[comboBox1.SelectedIndex]))[0])
                 {
-                    DataSet[i].Draw(g, startX + position % lineWidth * stepXY, startY + position / lineWidth * stepXY, 1);
+                    DataSet[i].Draw(g, startX + position % lineWidth * stepXY, startY + position / lineWidth * stepXY);
 
 
                     // check selection

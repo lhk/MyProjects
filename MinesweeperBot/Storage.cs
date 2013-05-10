@@ -19,7 +19,7 @@ namespace MinesweeperBot
         public static List<DataPoint> DataPoints = null;
         public static ArtificialNeuralNetwork ANN = null;
         public static PrincipalComponentAnalysis PCA = null;
-
+        public static Preprocessor Preprocessor;
         
 
 
@@ -48,7 +48,7 @@ namespace MinesweeperBot
             SQLite.Open();
             
             // read datapoints
-            var res = new SQLiteCommand("SELECT * FROM LabeledData", SQLite).ExecuteReader();
+            var res = new SQLiteCommand("SELECT * FROM LabeledData ORDER BY `ID`", SQLite).ExecuteReader();
             while (res.Read())
             {
                 string ID = "";
@@ -86,18 +86,18 @@ namespace MinesweeperBot
                         case "Data": Data = res.GetString(i); break;
                     }
                 }
-                if (Type == "ArtificialNeuralNetwork" && ID != "yIllnnOBmYHf")
+                if (Type == "ArtificialNeuralNetwork")
                 {
                     Storage.ANN = new ArtificialNeuralNetwork();
                     Storage.ANN.ID = ID;
                     Storage.ANN.Deserialize(Data);
                 }
-                else if (Type == "PrincipalComponentAnalysis")
+                /*else if (Type == "PrincipalComponentAnalysis")
                 {
                     Storage.PCA = new PrincipalComponentAnalysis();
                     Storage.PCA.ID = ID;
                     Storage.PCA.Deserialize(Data);
-                }
+                }*/
             }
 
             SQLite.Close();
@@ -107,11 +107,13 @@ namespace MinesweeperBot
                 Storage.ANN = new ArtificialNeuralNetwork();
                 Storage.ANN.Init();
             }
-            if (Storage.PCA == null)
+            /*if (Storage.PCA == null)
             {
                 Storage.PCA = new PrincipalComponentAnalysis();
                 Storage.PCA.PCASetup();
-            }
+            }*/
+
+            Preprocessor = new Preprocessor();
         }
 
 
@@ -127,10 +129,10 @@ namespace MinesweeperBot
 
 
             Storage.ANN.SaveToDatabase(SQLite);
-            Storage.PCA.SaveToDatabase(SQLite);
+            //Storage.PCA.SaveToDatabase(SQLite);
 
 
-
+            new SQLiteCommand("DELETE FROM LabeledData WHERE `Label` == 'j'", SQLite).ExecuteReader();
             new SQLiteCommand("end", SQLite).ExecuteNonQuery(); 
             SQLite.Close();
         }

@@ -16,7 +16,8 @@ namespace MinesweeperBot
 
         public void SaveToDatabase(SQLiteConnection sqlite)
         {
-            if (ID == null || ID.Length < 1) ID = FormatHelper.hash(Serialize());
+            if (ID == null || ID.Length < 1) 
+                ID = FormatHelper.hash(Serialize());
 
             SQLiteCommand cmd = sqlite.CreateCommand();
             cmd.CommandText = "SELECT COUNT(*) FROM Objects WHERE `ID` == @id";

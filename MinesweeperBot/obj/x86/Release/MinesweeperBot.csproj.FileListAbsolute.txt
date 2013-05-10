@@ -20,3 +20,4 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\Gen
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.exe
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Release\MinesweeperBot.pdb
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\MinesweeperBot.exe.config
+C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Release\alglibnet2.dll

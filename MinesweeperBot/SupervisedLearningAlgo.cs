@@ -58,21 +58,16 @@ namespace MinesweeperBot
         {
             while (runOptimization)
             {
-                double cost = Storage.ANN.OptimizationStep();
-                /*var gradient = Storage.ANN.ComputeGradient();
-                for (int i = 0; i < Storage.ANN.Parameters.Length; i++)
-                {
-                    Storage.ANN.Parameters[i] -= gradient[i] * Storage.ANN.LearningRate;
-                }
+                //double cost = Storage.ANN.OptimizationStep();
 
-                double cost = Storage.ANN.overallError(Storage.ANN.Parameters);*/
+                Storage.ANN.LBFGS_Step(this);
 
-                try
+                /*try
                 {
                     Invoke((MethodInvoker)
                         delegate
                         {
-                            if (oldCost != 0)
+                            if (oldCost != 0 && cost < 1e20 && cost > 1e-20 && oldCost < 1e20 && oldCost > 1e-20)
                             {
                                 chart2.Series[0].Points.Add(oldCost - cost);
                                 chart1.Series[0].Points.Add(cost);
@@ -81,8 +76,27 @@ namespace MinesweeperBot
                             label2.Text = Storage.ANN.LearningRate.ToString("e2");
                         });
                 }
-                catch { }
+                catch { }*/
             }
+        }
+
+        public void LogError(double cost)
+        {
+            try
+            {
+                Invoke((MethodInvoker)
+                    delegate
+                    {
+                        if (oldCost != 0 && cost < 1e20 && cost > 1e-20 && oldCost < 1e20 && oldCost > 1e-20)
+                        {
+                            chart2.Series[0].Points.Add(oldCost - cost);
+                            chart1.Series[0].Points.Add(cost);
+                        }
+                        oldCost = cost;
+                        label2.Text = Storage.ANN.LearningRate.ToString("e2");
+                    });
+            }
+            catch { }
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -105,6 +119,15 @@ namespace MinesweeperBot
         private void SupervisedLearningAlgo_FormClosing(object sender, FormClosingEventArgs e)
         {
             runOptimization = false;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Really?", "", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+            {
+                //Storage.ANN = new ArtificialNeuralNetwork();
+                Storage.ANN.Init();
+            }
         }
     }
 }

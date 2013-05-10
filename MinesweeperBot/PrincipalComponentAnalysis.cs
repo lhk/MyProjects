@@ -13,6 +13,8 @@ namespace MinesweeperBot
         double[] Mean, Std;
         Matrix<double> U_reduce_transpose;
 
+        Dictionary<string, Vector<double>> cache = new Dictionary<string, Vector<double>>();
+
         public PrincipalComponentAnalysis()
         {
             Type = "PrincipalComponentAnalysis";
@@ -105,9 +107,11 @@ namespace MinesweeperBot
                 sumSingularValues2 += S[k];
                 if (sumSingularValues2 / sumSingularValues > .9999) break;
             }
-            k = 220;
 
-            U_reduce_transpose = svd_Solver.U().SubMatrix(0,k,0, Storage.DataPoints[0].Features.Length);//, 0, k);
+            U_reduce_transpose = svd_Solver.U().SubMatrix(0, Storage.DataPoints[0].Features.Length, 0, k).Transpose();
+            //var costRight = OverallCost(svd_Solver.U().SubMatrix(0, Storage.DataPoints[0].Features.Length, 0, k).Transpose());
+            //var costWrong = OverallCost(svd_Solver.U().SubMatrix(0, k, 0, Storage.DataPoints[0].Features.Length));
+            //var costPerfect = OverallCost(svd_Solver.U());
         }
 
         private Vector<double> Normalize(double[] p)
@@ -120,9 +124,40 @@ namespace MinesweeperBot
             return v;
         }
 
-        internal Vector<double> EvaluateFunction(Vector<double> input)
+        /*double OverallCost(Matrix<double> m)
+        {
+            m = m.Transpose() * m;
+            double cost = 0;
+            for (int i = 0; i < Storage.DataPoints.Count; i++)
+            {
+                var v = new DenseVector(Storage.DataPoints[i].Features);
+                var diff = v - (m * v);
+                cost += diff.DotProduct(diff);
+            }
+            return cost / Storage.DataPoints.Count;
+        }
+
+        public Vector<double> EvaluateFunction(Vector<double> input)
         {
             return U_reduce_transpose * input;
+        }
+
+        public Vector<double> Reconstruct(Vector<double> input)
+        {
+            return U_reduce_transpose.Transpose() * input;
+        }*/
+
+        internal Vector<double> Reduce(string id, Vector<double> input)
+        {
+            if (id == null) return U_reduce_transpose * input;
+
+            lock (cache)
+            {
+                if (!cache.ContainsKey(id))
+                    cache[id] = U_reduce_transpose * input;
+
+                return cache[id];
+            }
         }
     }
 }

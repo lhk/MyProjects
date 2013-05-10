@@ -42,3 +42,4 @@ C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\Mines
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.read.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\obj\x86\Debug\GenerateResource.write.1.tlog
 C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\MinesweeperBot.exe.config
+C:\Users\janismac\Documents\GitHub\MyProjects\MinesweeperBot\bin\Debug\alglibnet2.dll

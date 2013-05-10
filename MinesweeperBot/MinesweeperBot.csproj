@@ -49,6 +49,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="alglibnet2">
+      <HintPath>D:\Desktop\alglib-3.7.0.csharp\csharp\alglibnet2.dll</HintPath>
+    </Reference>
     <Reference Include="Fast Bitmap Beta">
       <HintPath>Fast Bitmap Beta\Fast Bitmap Beta.dll</HintPath>
     </Reference>
@@ -113,6 +116,7 @@
       <DependentUpon>MinesweeperInterface.cs</DependentUpon>
     </Compile>
     <Compile Include="ObjectDumper.cs" />
+    <Compile Include="Preprocessor.cs" />
     <Compile Include="PrincipalComponentAnalysis.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
