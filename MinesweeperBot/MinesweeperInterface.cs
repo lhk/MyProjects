@@ -65,7 +65,7 @@ namespace MinesweeperBot
                             if (GetWindowRect(new HandleRef(this, GetForegroundWindow()), out rect))
                             {
                                 Rectangle bounds = new Rectangle(rect.Left + 39, rect.Top + 81, rect.Width - 39 - 37, rect.Height - 81 - 40);
-                                foreach (var freeField in gamesolver.knownFreeFields)
+                                foreach (var freeField in gamesolver.newKnownFreeFields)
                                 {
                                     if (Categorization[freeField.X, freeField.Y] == 'x' || Categorization[freeField.X, freeField.Y] == 'f')
                                     {
@@ -81,7 +81,7 @@ namespace MinesweeperBot
                                     }
                                 }
 
-                                foreach (var freeField in gamesolver.knownMinedFields)
+                                foreach (var freeField in gamesolver.newKnownMinedFields)
                                 {
                                     if (Categorization[freeField.X, freeField.Y] == 'x')
                                     {
@@ -164,12 +164,12 @@ namespace MinesweeperBot
                         g.DrawString("No Click-Point found.", new Font("Arial", 20), new SolidBrush(Color.Red), 50, 750);
                     }
 
-                    foreach (var freeField in gamesolver.knownFreeFields)
+                    foreach (var freeField in gamesolver.newKnownFreeFields)
                     {
                         int radius = 6;
                         g.DrawEllipse(new Pen(Color.LightGreen, 3), 18 * freeField.X + 46 - 25, 18 * freeField.Y + 350, radius * 2, radius * 2);
                     }
-                    foreach (var mine in gamesolver.knownMinedFields)
+                    foreach (var mine in gamesolver.newKnownMinedFields)
                     {
                         int radius = 6;
                         g.DrawEllipse(new Pen(Color.Red, 3), 18 * mine.X + 46 - 25, 18 * mine.Y + 350, radius * 2, radius * 2);
@@ -237,10 +237,10 @@ namespace MinesweeperBot
             DataPoint p = new DataPoint(Features, '?', evaluation = Storage.ANN.EvaluateFunction(Features, .5), 't');
 
             // add datapoint to database
-            if (allowDataAdding && !Storage.DataPoints.Contains(p))
+            /*if (allowDataAdding && !Storage.DataPoints.Contains(p))
             {
                 Storage.DataPoints.Add(p);
-            }
+            }*/
 
             return evaluation;
         }

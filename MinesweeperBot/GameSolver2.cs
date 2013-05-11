@@ -10,13 +10,13 @@ namespace MinesweeperBot
     class GameSolver2
     {
         //char[,] PreviousCategorization;
-        public List<Point> knownFreeFields = new List<Point>();
-        public List<Point> knownMinedFields = new List<Point>();
+        public List<Point> newKnownFreeFields = new List<Point>();
+        public List<Point> newKnownMinedFields = new List<Point>();
 
         public void Analyze(char[,] Categorization)
         {
-            knownFreeFields.Clear();
-            knownMinedFields.Clear();
+            newKnownFreeFields.Clear();
+            newKnownMinedFields.Clear();
 
             int width = Categorization.GetUpperBound(0) + 1;
             int height = Categorization.GetUpperBound(1) + 1;
@@ -33,7 +33,7 @@ namespace MinesweeperBot
                         if (LabelToNumber(Categorization[x, y]) == perimeterCount)
                         {
                             ignoreList.Add(new Point(x, y));
-                            PerimeterIterator(new Point(x, y), width, height, p => { if (Categorization[p.X, p.Y] == 'x') knownFreeFields.Add(p); });
+                            PerimeterIterator(new Point(x, y), width, height, p => { if (Categorization[p.X, p.Y] == 'x') newKnownFreeFields.Add(p); });
                         }
                     }
                 }
@@ -54,8 +54,41 @@ namespace MinesweeperBot
 
                 //for (int i = 0; i < tupleList.Count; i++) AnalyzeTuple(Categorization, tupleList[i], width, height); 
                 Parallel.For(0, tupleList.Count, i => { AnalyzeTuple(Categorization, tupleList[i], width, height); });
-                if (knownFreeFields.Count > 0) break;
+                if (newKnownFreeFields.Count > 0 && n >= 2) break;
             }
+
+            if (newKnownFreeFields.Count == 0 && newKnownMinedFields.Count == 0)
+                RandomGuess(Categorization);
+        }
+
+        private void RandomGuess(char[,] Categorization)
+        {
+            int width = Categorization.GetUpperBound(0) + 1;
+            int height = Categorization.GetUpperBound(1) + 1;
+
+            List<Point> possibleGuessesList = new List<Point>();
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {
+                    bool numberInPerimeter = false;
+                    PerimeterIterator(new Point(x, y), width, height, p => { if (LabelToNumber(Categorization[p.X,p.Y]) > 0) numberInPerimeter = true; });
+                    if (Categorization[x, y] == 'x' && numberInPerimeter)
+                        possibleGuessesList.Add(new Point(x, y));
+                }
+
+            if (possibleGuessesList.Count <= 0)
+            {
+                possibleGuessesList.Clear();
+                for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (Categorization[x, y] == 'x')
+                            possibleGuessesList.Add(new Point(x, y));
+                    }
+            }
+
+            if (possibleGuessesList.Count > 0)
+                newKnownFreeFields.Add(possibleGuessesList[GenuineRandomGenerator.GetInt(possibleGuessesList.Count)]);
         }
 
         void PerimeterIterator(Point point, int width, int height, Action<Point> func)
@@ -72,14 +105,20 @@ namespace MinesweeperBot
             }
         }
 
+        int PerimeterFlagCount(char[,] Categorization, Point _p)
+        {
+            int perimeterCount = 0;
+            PerimeterIterator(_p, Categorization.GetUpperBound(0) + 1, Categorization.GetUpperBound(1) + 1, p => { if (Categorization[p.X, p.Y] == 'f') perimeterCount++; });
+            return perimeterCount;
+        }
+
         void AnalyzeTuple(char[,] Categorization, Point[] tuple, int width, int height)
         {
-
             // list all unkowns connected to the tuple
             List<Point> unknowns = new List<Point>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
-                    if (Categorization[x, y] == 'x' || Categorization[x, y] == 'f')
+                    if (Categorization[x, y] == 'x')// || Categorization[x, y] == 'f')
                     {
                         Point p = new Point(x, y);
                         for (int i = 0; i < tuple.Length; i++)
@@ -105,7 +144,7 @@ namespace MinesweeperBot
             int maximumPossibleMinesInCurrentTuple = 0;
             for (int i = 0; i < tuple.Length; i++)
             {
-                int fieldPerimeterCount = LabelToNumber(Categorization[tuple[i].X, tuple[i].Y]);
+                int fieldPerimeterCount = LabelToNumber(Categorization[tuple[i].X, tuple[i].Y]) - PerimeterFlagCount(Categorization, tuple[i]);
                 maximumPossibleMinesInCurrentTuple += fieldPerimeterCount;
                 if (minimumPossibleMinesInCurrentTuple > fieldPerimeterCount) minimumPossibleMinesInCurrentTuple = fieldPerimeterCount;
             }
@@ -115,14 +154,20 @@ namespace MinesweeperBot
 
 
             // if one unknow is guaranteed to be free, return it as the new point to click on
-            lock(knownFreeFields) lock(knownMinedFields)
+            lock(newKnownFreeFields) lock(newKnownMinedFields)
             for (int i = 0; i < unknowns.Count; i++)
             {
-                if (unknownIsFree[i] && !knownFreeFields.Contains(unknowns[i]))
-                    knownFreeFields.Add(unknowns[i]);
+                if (unknownIsFree[i] && !newKnownFreeFields.Contains(unknowns[i]))
+                {
+                    if (unknowns[i] == new Point(8, 4))
+                    {
 
-                if (unknownIsMined[i] && !knownMinedFields.Contains(unknowns[i]))
-                    knownMinedFields.Add(unknowns[i]);
+                    }
+                    newKnownFreeFields.Add(unknowns[i]);
+                }
+
+                if (unknownIsMined[i] && !newKnownMinedFields.Contains(unknowns[i]))
+                    newKnownMinedFields.Add(unknowns[i]);
             }
         }
 
@@ -146,11 +191,6 @@ namespace MinesweeperBot
                     //permutations.Add(nextTargetSetBits);
                     if (IsTuplePermutationPossible(Categorization, tuple, unknowns, nextTargetSetBits))
                     {
-                        if (wantedTargetSetSize == 0)
-                        {
-
-                        }
-
                         for (int j = 0; j < unknowns.Count; j++)
                         {
                             if (GetBit(nextTargetSetBits, j)) 
@@ -167,16 +207,12 @@ namespace MinesweeperBot
         bool IsTuplePermutationPossible(char[,] Categorization, Point[] tuple, List<Point> unknowns, long permutation)
         {
             for (int j = 0; j < tuple.Length; j++)
-            {
-                if (perimeterCount(tuple[j], unknowns, permutation) != LabelToNumber(Categorization[tuple[j].X, tuple[j].Y]))
-                {
+                if (permutationPerimeterCount(tuple[j], unknowns, permutation) + PerimeterFlagCount(Categorization,tuple[j]) != LabelToNumber(Categorization[tuple[j].X, tuple[j].Y]))
                     return false;
-                }
-            }
             return true;
         }
 
-        int perimeterCount(Point p1, List<Point> unknowns, long permutation)
+        int permutationPerimeterCount(Point p1, List<Point> unknowns, long permutation)
         {
             int perimeterCount = 0;
             for (int j = 0; j < unknowns.Count; j++)
