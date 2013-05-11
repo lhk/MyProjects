@@ -73,7 +73,7 @@ namespace MinesweeperBot
                                         mouse_event(MOUSEEVENTF_LEFTDOWN,
                                             (uint)(bounds.X + freeField.X * 18 + 5),
                                             (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
-                                        Thread.Sleep(5);
+                                        Thread.Sleep(1);
                                         mouse_event( MOUSEEVENTF_LEFTUP,
                                             (uint)(bounds.X + freeField.X * 18 + 5),
                                             (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
@@ -81,7 +81,7 @@ namespace MinesweeperBot
                                     }
                                 }
 
-                                /*foreach (var freeField in gamesolver.knownMinedFields)
+                                foreach (var freeField in gamesolver.knownMinedFields)
                                 {
                                     if (Categorization[freeField.X, freeField.Y] == 'x')
                                     {
@@ -89,13 +89,13 @@ namespace MinesweeperBot
                                         mouse_event(MOUSEEVENTF_RIGHTDOWN,
                                             (uint)(bounds.X + freeField.X * 18 + 5),
                                             (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
-                                        Thread.Sleep(5);
+                                        Thread.Sleep(1);
                                         mouse_event(MOUSEEVENTF_RIGHTUP,
                                             (uint)(bounds.X + freeField.X * 18 + 5),
                                             (uint)(bounds.Y + freeField.Y * 18 + 5), 0, 0);
                                         Thread.Sleep(20);
                                     }
-                                }*/
+                                }
                                 
                                 /*SetCursorPos(bounds.X + nextClick.X * 18 + 5, bounds.Y + nextClick.Y * 18 + 5);
                                 mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,

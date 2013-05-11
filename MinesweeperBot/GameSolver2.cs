@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace MinesweeperBot
 {
@@ -44,28 +45,16 @@ namespace MinesweeperBot
                     if (LabelToNumber(Categorization[x, y]) > 0 && !ignoreList.Contains(new Point(x, y)))// && (PreviousCategorization == null || LabelToNumber(PreviousCategorization[x, y]) <= 0))
                         FreeFields.Add(new Point(x, y));
 
-            /*int firstIterationFieldListLimit = FreeFields.Count;
-
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    if (LabelToNumber(Categorization[x, y]) > 0 && !FreeFields.Contains(new Point(x, y)))
-                        FreeFields.Add(new Point(x, y));*/
 
             // get n tupel list
-            for (int n = 1; n < 4; n++)
+            for (int n = 1; n < 5; n++)
             {
                 List<Point[]> tupleList = new List<Point[]>();
                 TupleCombinationTree(tupleList, FreeFields, new Point[n], 0, 0);
 
-                for (int i = 0; i < tupleList.Count; i++)
-                {
-                    if (tupleList[i].Contains(new Point(14, 9)) && tupleList[i].Contains(new Point(14, 10)))
-                    {
-
-                    }
-
-                    AnalyzeTuple(Categorization, tupleList[i], width, height);
-                }
+                //for (int i = 0; i < tupleList.Count; i++) AnalyzeTuple(Categorization, tupleList[i], width, height); 
+                Parallel.For(0, tupleList.Count, i => { AnalyzeTuple(Categorization, tupleList[i], width, height); });
+                if (knownFreeFields.Count > 0) break;
             }
         }
 
@@ -112,7 +101,7 @@ namespace MinesweeperBot
                 unknownIsMined[i] = true;
             }
 
-            int minimumPossibleMinesInCurrentTuple = 0;
+            int minimumPossibleMinesInCurrentTuple = 999;
             int maximumPossibleMinesInCurrentTuple = 0;
             for (int i = 0; i < tuple.Length; i++)
             {
@@ -126,6 +115,7 @@ namespace MinesweeperBot
 
 
             // if one unknow is guaranteed to be free, return it as the new point to click on
+            lock(knownFreeFields) lock(knownMinedFields)
             for (int i = 0; i < unknowns.Count; i++)
             {
                 if (unknownIsFree[i] && !knownFreeFields.Contains(unknowns[i]))
@@ -151,11 +141,16 @@ namespace MinesweeperBot
                 long nextTargetSetBits = currentTargetSetBits;
                 nextTargetSetBits = SetBit(nextTargetSetBits, true, i);
 
-                if (wantedTargetSetSize == currentTargetSetSize)
+                if (wantedTargetSetSize == currentTargetSetSize+1)
                 {
                     //permutations.Add(nextTargetSetBits);
                     if (IsTuplePermutationPossible(Categorization, tuple, unknowns, nextTargetSetBits))
                     {
+                        if (wantedTargetSetSize == 0)
+                        {
+
+                        }
+
                         for (int j = 0; j < unknowns.Count; j++)
                         {
                             if (GetBit(nextTargetSetBits, j)) 
@@ -171,15 +166,14 @@ namespace MinesweeperBot
 
         bool IsTuplePermutationPossible(char[,] Categorization, Point[] tuple, List<Point> unknowns, long permutation)
         {
-            bool isPossiblePermutation = true;
-            for (int j = 0; j < tuple.Length && isPossiblePermutation; j++)
+            for (int j = 0; j < tuple.Length; j++)
             {
                 if (perimeterCount(tuple[j], unknowns, permutation) != LabelToNumber(Categorization[tuple[j].X, tuple[j].Y]))
                 {
-                    isPossiblePermutation = false;
+                    return false;
                 }
             }
-            return isPossiblePermutation;
+            return true;
         }
 
         int perimeterCount(Point p1, List<Point> unknowns, long permutation)
