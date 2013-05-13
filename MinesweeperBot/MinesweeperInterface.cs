@@ -29,7 +29,6 @@ namespace MinesweeperBot
         /// </summary>
         Point nextClick = new Point(-2,-2);
         Point lastClick = new Point(-2, -2);
-        GameSolver2 gamesolver = new GameSolver2();
 
         public MinesweeperInterface()
         {
@@ -57,7 +56,7 @@ namespace MinesweeperBot
                     if (GetKeyState(0x2E) < 0)
                     {
                         //nextClick = GameSolver.FindNextClick(Categorization, lastClick);
-                        gamesolver.Analyze(Categorization);
+                        GameSolver.Analyze(Categorization);
 
                         if (/*nextClick.X >= 0 && */GetTopWindowText() == "Minesweeper")
                         {
@@ -65,8 +64,9 @@ namespace MinesweeperBot
                             if (GetWindowRect(new HandleRef(this, GetForegroundWindow()), out rect))
                             {
                                 Rectangle bounds = new Rectangle(rect.Left + 39, rect.Top + 81, rect.Width - 39 - 37, rect.Height - 81 - 40);
-                                foreach (var freeField in gamesolver.newKnownFreeFields)
+                                foreach (var freeField in GameSolver.newKnownFreeFields)
                                 {
+                                    if (GetTopWindowText() != "Minesweeper") break;
                                     if (Categorization[freeField.X, freeField.Y] == 'x' || Categorization[freeField.X, freeField.Y] == 'f')
                                     {
                                         SetCursorPos(bounds.X + freeField.X * 18 + 5, bounds.Y + freeField.Y * 18 + 5);
@@ -81,8 +81,9 @@ namespace MinesweeperBot
                                     }
                                 }
 
-                                foreach (var freeField in gamesolver.newKnownMinedFields)
+                                foreach (var freeField in GameSolver.newKnownMinedFields)
                                 {
+                                    if (GetTopWindowText() != "Minesweeper") break;
                                     if (Categorization[freeField.X, freeField.Y] == 'x')
                                     {
                                         SetCursorPos(bounds.X + freeField.X * 18 + 5, bounds.Y + freeField.Y * 18 + 5);
@@ -114,6 +115,11 @@ namespace MinesweeperBot
             }
             else
             {
+                if (GetTopWindowText() == "Spiel verloren" || GetTopWindowText() == "Spiel gewonnen")
+                {
+                    SendKeys.SendWait("~");
+                }
+
                 screenshot = null;
                 nextClick = new Point(-2, -2);
             }
@@ -164,12 +170,12 @@ namespace MinesweeperBot
                         g.DrawString("No Click-Point found.", new Font("Arial", 20), new SolidBrush(Color.Red), 50, 750);
                     }
 
-                    foreach (var freeField in gamesolver.newKnownFreeFields)
+                    foreach (var freeField in GameSolver.newKnownFreeFields)
                     {
                         int radius = 6;
                         g.DrawEllipse(new Pen(Color.LightGreen, 3), 18 * freeField.X + 46 - 25, 18 * freeField.Y + 350, radius * 2, radius * 2);
                     }
-                    foreach (var mine in gamesolver.newKnownMinedFields)
+                    foreach (var mine in GameSolver.newKnownMinedFields)
                     {
                         int radius = 6;
                         g.DrawEllipse(new Pen(Color.Red, 3), 18 * mine.X + 46 - 25, 18 * mine.Y + 350, radius * 2, radius * 2);
@@ -179,7 +185,6 @@ namespace MinesweeperBot
                 {
                     g.DrawLine(new Pen(Color.Red, 3), 10, 10, 100, 100);
                     g.DrawLine(new Pen(Color.Red, 3), 10, 100, 100, 10);
-                    gamesolver = new GameSolver2();
                 }
             }
             catch (Exception ex)

@@ -85,7 +85,6 @@
     <Compile Include="DataPoint.cs" />
     <Compile Include="FormatHelper.cs" />
     <Compile Include="GameSolver.cs" />
-    <Compile Include="GameSolver2.cs" />
     <Compile Include="GenuineRandomGenerator.cs" />
     <Compile Include="DBObject.cs" />
     <Compile Include="LabelData.cs">

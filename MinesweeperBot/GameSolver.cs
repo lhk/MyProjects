@@ -3,91 +3,227 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace MinesweeperBot
 {
-    class GameSolver
+    public static class GameSolver
     {
-        public static Point FindNextClick(char[,] Categorization, Point lastClick)
+        //char[,] PreviousCategorization;
+        public static List<Point> newKnownFreeFields = new List<Point>();
+        public static List<Point> newKnownMinedFields = new List<Point>();
+
+        public static void Analyze(char[,] Categorization)
+        {
+            newKnownFreeFields.Clear();
+            newKnownMinedFields.Clear();
+
+            int width = Categorization.GetUpperBound(0) + 1;
+            int height = Categorization.GetUpperBound(1) + 1;
+
+            List<Point> ignoreList = new List<Point>();
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {
+                    if (LabelToNumber(Categorization[x, y]) > 0)
+                    {
+                        int perimeterCount = 0;
+                        PerimeterIterator(new Point(x, y), width, height, p => { if (Categorization[p.X, p.Y] == 'f') perimeterCount++; });
+
+                        if (LabelToNumber(Categorization[x, y]) == perimeterCount)
+                        {
+                            ignoreList.Add(new Point(x, y));
+                            PerimeterIterator(new Point(x, y), width, height, p => { if (Categorization[p.X, p.Y] == 'x') newKnownFreeFields.Add(p); });
+                        }
+                    }
+                }
+
+
+            List<Point> FreeFields = new List<Point>();
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    if (LabelToNumber(Categorization[x, y]) > 0 && !ignoreList.Contains(new Point(x, y)))// && (PreviousCategorization == null || LabelToNumber(PreviousCategorization[x, y]) <= 0))
+                        FreeFields.Add(new Point(x, y));
+
+
+            // get n tupel list
+            for (int n = 1; n < 5; n++)
+            {
+                List<Point[]> tupleList = new List<Point[]>();
+                TupleCombinationTree(tupleList, FreeFields, new Point[n], 0, 0);
+
+                //for (int i = 0; i < tupleList.Count; i++) AnalyzeTuple(Categorization, tupleList[i], width, height); 
+                Parallel.For(0, tupleList.Count, i => { AnalyzeTuple(Categorization, tupleList[i], width, height); });
+                if (newKnownFreeFields.Count > 0 && n >= 2) break;
+            }
+
+            if (newKnownFreeFields.Count == 0 && newKnownMinedFields.Count == 0)
+                RandomGuess(Categorization);
+        }
+
+        private static void RandomGuess(char[,] Categorization)
         {
             int width = Categorization.GetUpperBound(0) + 1;
             int height = Categorization.GetUpperBound(1) + 1;
 
-            // create list of all non-zero && known fields
-            List<Point> fields = new List<Point>();
-            for (int x1 = 0; x1 < width; x1++)
-            {
-                for (int y1 = 0; y1 < height; y1++)
+            List<Point> possibleGuessesList = new List<Point>();
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    if (Categorization[x1, y1] != 'x' && Categorization[x1, y1] != 'f' && Categorization[x1, y1] != '0')
+                    bool numberInPerimeter = false;
+                    PerimeterIterator(new Point(x, y), width, height, p => { if (LabelToNumber(Categorization[p.X,p.Y]) > 0) numberInPerimeter = true; });
+                    if (Categorization[x, y] == 'x' && numberInPerimeter)
+                        possibleGuessesList.Add(new Point(x, y));
+                }
+
+            if (possibleGuessesList.Count <= 0)
+            {
+                possibleGuessesList.Clear();
+                for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
                     {
-                        fields.Add(new Point(x1, y1));
+                        if (Categorization[x, y] == 'x')
+                            possibleGuessesList.Add(new Point(x, y));
+                    }
+            }
+
+            if (possibleGuessesList.Count > 0)
+                newKnownFreeFields.Add(possibleGuessesList[GenuineRandomGenerator.GetInt(possibleGuessesList.Count)]);
+        }
+
+        static void PerimeterIterator(Point point, int width, int height, Action<Point> func)
+        {
+            for (int x = point.X - 1; x <= point.X + 1; x++)
+            {
+                for (int y = point.Y - 1; y <= point.Y + 1; y++)
+                {
+                    if (x >= 0 && y >= 0 && x < width && y < height && (x != point.X || y != point.Y))
+                    {
+                        func(new Point(x, y));
                     }
                 }
             }
+        }
 
-            // search list of all n tuples
-            for (int n = 2; n <= 3; n++)
+        static int PerimeterFlagCount(char[,] Categorization, Point _p)
+        {
+            int perimeterCount = 0;
+            PerimeterIterator(_p, Categorization.GetUpperBound(0) + 1, Categorization.GetUpperBound(1) + 1, p => { if (Categorization[p.X, p.Y] == 'f') perimeterCount++; });
+            return perimeterCount;
+        }
+
+        static void AnalyzeTuple(char[,] Categorization, Point[] tuple, int width, int height)
+        {
+            // list all unkowns connected to the tuple
+            List<Point> unknowns = new List<Point>();
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                    if (Categorization[x, y] == 'x')// || Categorization[x, y] == 'f')
+                    {
+                        Point p = new Point(x, y);
+                        for (int i = 0; i < tuple.Length; i++)
+                        {
+                            if (IsInPerimeter(p, tuple[i]))
+                            {
+                                unknowns.Add(p);
+                                break;
+                            }
+                        }
+                    }
+
+
+            bool[] unknownIsFree = new bool[unknowns.Count];
+            bool[] unknownIsMined = new bool[unknowns.Count];
+            for (int i = 0; i < unknownIsFree.Length; i++)
             {
-                List<Point[]> NTuples = GetAllNTuples(n, fields);
-                var itemList = (from t in NTuples
-                                orderby SqDist(lastClick,TupleCenter(t))
-                                select t).ToArray();
+                unknownIsFree[i] = true;
+                unknownIsMined[i] = true;
+            }
 
-                foreach (var tuple in itemList)
+            int minimumPossibleMinesInCurrentTuple = 999;
+            int maximumPossibleMinesInCurrentTuple = 0;
+            for (int i = 0; i < tuple.Length; i++)
+            {
+                int fieldPerimeterCount = LabelToNumber(Categorization[tuple[i].X, tuple[i].Y]) - PerimeterFlagCount(Categorization, tuple[i]);
+                maximumPossibleMinesInCurrentTuple += fieldPerimeterCount;
+                if (minimumPossibleMinesInCurrentTuple > fieldPerimeterCount) minimumPossibleMinesInCurrentTuple = fieldPerimeterCount;
+            }
+
+            AnalyzePermutations(Categorization, tuple, unknowns, unknownIsFree, unknownIsMined, minimumPossibleMinesInCurrentTuple, maximumPossibleMinesInCurrentTuple);
+
+
+
+            // if one unknow is guaranteed to be free, return it as the new point to click on
+            lock(newKnownFreeFields) lock(newKnownMinedFields)
+            for (int i = 0; i < unknowns.Count; i++)
+            {
+                if (unknownIsFree[i] && !newKnownFreeFields.Contains(unknowns[i]))
                 {
-                    Point p = AnalyzeTuple(Categorization, tuple, width, height);
-                    if (p.X >= 0) return p;
+                    if (unknowns[i] == new Point(8, 4))
+                    {
+
+                    }
+                    newKnownFreeFields.Add(unknowns[i]);
                 }
+
+                if (unknownIsMined[i] && !newKnownMinedFields.Contains(unknowns[i]))
+                    newKnownMinedFields.Add(unknowns[i]);
             }
-
-
-
-            return new Point(-1, -1);
         }
 
-        private static List<Point[]> GetAllNTuples(int n, List<Point> fields)
+        static void AnalyzePermutations(char[,] Categorization, Point[] tuple, List<Point> unknowns, bool[] unknownIsFree, bool[] unknownIsMined, int minimumPossibleMinesInCurrentTuple, int maximumPossibleMinesInCurrentTuple)
         {
-            List<Point[]> tupleList = new List<Point[]>();
-            TupleCombinationTree(tupleList, fields, new Point[n], 0, 0);
-            return tupleList;
+            for (int i = minimumPossibleMinesInCurrentTuple; i <= maximumPossibleMinesInCurrentTuple; i++)
+            {
+                KinN_permutationTree(Categorization, tuple, unknowns, unknownIsFree, unknownIsMined, i, 0, 0, 0);
+            }
         }
 
-        /*private static List<Point[]> FilterForConnectedTuples(List<Point[]> unfilteredTupleList)
+        static void KinN_permutationTree(char[,] Categorization, Point[] tuple, List<Point> unknowns, bool[] unknownIsFree, bool[] unknownIsMined, int wantedTargetSetSize, int currentTargetSetSize, long currentTargetSetBits, int startIndex)
         {
-            List<Point[]> filteredTupleList = new List<Point[]>();
-            foreach (var tuple in unfilteredTupleList)
+            for (int i = startIndex; i < unknowns.Count; i++)
             {
-                if (TupleIsConnected(tuple)) filteredTupleList.Add(tuple);
-            }
-            return filteredTupleList;
-        }*/
+                long nextTargetSetBits = currentTargetSetBits;
+                nextTargetSetBits = SetBit(nextTargetSetBits, true, i);
 
-        private static bool TupleIsConnected(Point[] tuple)
-        {
-            bool[] pointIsConnected = new bool[tuple.Length];
-            for (int i = 0; i < pointIsConnected.Length; i++) pointIsConnected[i] = false;
-            pointIsConnected[0] = true;
-
-            // iterate over all possible connections
-            for (int i = 0; i < tuple.Length - 1; i++)
-            {
-                for (int j = i + 1; j < tuple.Length; j++)
+                if (wantedTargetSetSize == currentTargetSetSize+1)
                 {
-                    if (pointIsConnected[i] && IsInExtendedPerimeter(tuple[i], tuple[j]))
-                        pointIsConnected[j] = true;
+                    //permutations.Add(nextTargetSetBits);
+                    if (IsTuplePermutationPossible(Categorization, tuple, unknowns, nextTargetSetBits))
+                    {
+                        for (int j = 0; j < unknowns.Count; j++)
+                        {
+                            if (GetBit(nextTargetSetBits, j)) 
+                                unknownIsFree[j] = false;
+                            else
+                                unknownIsMined[j] = false;
+                        }
+                    }
                 }
+                else KinN_permutationTree(Categorization, tuple, unknowns, unknownIsFree, unknownIsMined, wantedTargetSetSize, currentTargetSetSize + 1, nextTargetSetBits, i + 1);
             }
-            return AllTrue(pointIsConnected);
         }
 
-        private static bool AllTrue(bool[] pointIsConnected)
+        static bool IsTuplePermutationPossible(char[,] Categorization, Point[] tuple, List<Point> unknowns, long permutation)
         {
-            foreach (var item in pointIsConnected)if (!item) return false;
+            for (int j = 0; j < tuple.Length; j++)
+                if (permutationPerimeterCount(tuple[j], unknowns, permutation) + PerimeterFlagCount(Categorization,tuple[j]) != LabelToNumber(Categorization[tuple[j].X, tuple[j].Y]))
+                    return false;
             return true;
         }
 
-        private static void TupleCombinationTree(List<Point[]> tupleList, List<Point> fields, Point[] tuple, int startIndex, int currentDepth)
+        static int permutationPerimeterCount(Point p1, List<Point> unknowns, long permutation)
+        {
+            int perimeterCount = 0;
+            for (int j = 0; j < unknowns.Count; j++)
+            {
+                if (IsInPerimeter(new Point(unknowns[j].X, unknowns[j].Y), p1) && GetBit(permutation, j))
+                    perimeterCount++;
+            }
+            return perimeterCount;
+        }
+
+        static void TupleCombinationTree(List<Point[]> tupleList, List<Point> fields, Point[] tuple, int startIndex, int currentDepth)
         {
             for (int i = startIndex; i < fields.Count; i++)
             {
@@ -106,173 +242,74 @@ namespace MinesweeperBot
             }
         }
 
-
-        private static Point AnalyzeTuple(char[,] Categorization, Point[] tuple, int width, int height)
+        static bool AllEqual(char[,] PreviousCategorization, char[,] Categorization)
         {
+            int width = Categorization.GetUpperBound(0) + 1;
+            int height = Categorization.GetUpperBound(1) + 1;
 
-            // list all unkowns connected to the tuple
-            List<Point> unknowns = new List<Point>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
-                    if (Categorization[x, y] == 'x' || Categorization[x, y] == 'f')
-                    {
-                        Point p = new Point(x, y);
-                        for (int i = 0; i < tuple.Length; i++)
-                        {
-                            if (IsInPerimeter(p, tuple[i]))
-                            {
-                                unknowns.Add(p);
-                                break;
-                            }
-                        }
-                    }
-
-
-            bool[] unknownIsFree = new bool[unknowns.Count];
-            for (int i = 0; i < unknownIsFree.Length; i++) unknownIsFree[i] = true;
-
-
-            int minimumPossibleMinesInCurrentTuple = 0;
-            int maximumPossibleMinesInCurrentTuple = 0;
-            for (int i = 0; i < tuple.Length; i++)
-            {
-                int fieldPerimeterCount = LabelToNumber(Categorization[tuple[i].X, tuple[i].Y]);
-                maximumPossibleMinesInCurrentTuple += fieldPerimeterCount;
-                if (minimumPossibleMinesInCurrentTuple > fieldPerimeterCount) minimumPossibleMinesInCurrentTuple = fieldPerimeterCount;
-            }
-
-            AnalyzePermutations(Categorization, tuple, unknowns, unknownIsFree, minimumPossibleMinesInCurrentTuple, maximumPossibleMinesInCurrentTuple);
-
-            
-
-            // if one unknow is guaranteed to be free, return it as the new point to click on
-            for (int i = 0; i < unknowns.Count; i++)
-            {
-                if (unknownIsFree[i]) return unknowns[i];
-            }
-
-            // return that no free point has been found
-            return new Point(-1, -1);
+                    if (PreviousCategorization[x, y] != Categorization[x, y]) return false;
+            return true;
         }
 
-        private static bool IsTuplePermutationPossible(char[,] Categorization, Point[] tuple, List<Point> unknowns, long permutation)
+        static bool TupleIsConnected(Point[] tuple)
         {
-            bool isPossiblePermutation = true;
-            for (int j = 0; j < tuple.Length && isPossiblePermutation; j++)
+            bool[] fieldIsConnected = new bool[tuple.Length];
+            for (int i = 0; i < fieldIsConnected.Length; i++) fieldIsConnected[i] = false;
+            fieldIsConnected[0] = true;
+
+            // iterate over all possible connections
+            for (int i = 0; i < tuple.Length - 1; i++)
             {
-                if (perimeterCount(tuple[j], unknowns, permutation) != LabelToNumber(Categorization[tuple[j].X, tuple[j].Y]))
+                for (int j = i + 1; j < tuple.Length; j++)
                 {
-                    isPossiblePermutation = false;
+                    if (fieldIsConnected[i] && IsInExtendedPerimeter(tuple[i], tuple[j]))
+                        fieldIsConnected[j] = true;
                 }
             }
-            return isPossiblePermutation;
+            return AllTrue(fieldIsConnected);
         }
 
-        private static void AnalyzePermutations(char[,] Categorization, Point[] tuple, List<Point> unknowns, bool[] unknownIsFree, int minimumPossibleMinesInCurrentTuple, int maximumPossibleMinesInCurrentTuple)
+        static bool AllTrue(bool[] pointIsConnected)
         {
-            for (int i = minimumPossibleMinesInCurrentTuple; i <= maximumPossibleMinesInCurrentTuple; i++)
-			{
-                KinN_permutationTree(Categorization, tuple, unknowns, unknownIsFree, i, 0, 0, 0);
-			}
+            foreach (var item in pointIsConnected) if (!item) return false;
+            return true;
         }
 
-        private static void KinN_permutationTree(char[,] Categorization, Point[] tuple, List<Point> unknowns, bool[] unknownIsFree, int wantedTargetSetSize, int currentTargetSetSize, long currentTargetSetBits, int startIndex)
-        {
-            for (int i = startIndex; i < unknowns.Count; i++)
-            {
-                long nextTargetSetBits = currentTargetSetBits;
-                nextTargetSetBits = SetBit(nextTargetSetBits, true, i);
-
-                if (wantedTargetSetSize == currentTargetSetSize)
-                {
-                    //permutations.Add(nextTargetSetBits);
-                    if (IsTuplePermutationPossible(Categorization, tuple, unknowns, nextTargetSetBits))
-                    {
-                        for (int j = 0; j < unknowns.Count; j++)
-                        {
-                            if (GetBit(nextTargetSetBits, j)) unknownIsFree[j] = false;
-                        }
-                    }
-                }
-                else KinN_permutationTree(Categorization, tuple, unknowns, unknownIsFree,  wantedTargetSetSize, currentTargetSetSize + 1, nextTargetSetBits, i + 1);
-            }
-        }
-
-        private static bool IsInField(Point p, int width, int height)
-        {
-            return p.X >= 0 && p.Y >= 0 && p.X < width && p.Y < height;
-        }
-
-        private static bool IsInPerimeter(Point p1, Point p2)
-        {
-            int d = SqDist(p1.X, p1.Y, p2.X, p2.Y);
-            return d > 0 && d <= 2;
-        }
-
-        private static bool IsInExtendedPerimeter(Point p1, Point p2)
-        {
-            int d = SqDist(p1.X, p1.Y, p2.X, p2.Y);
-            return d > 0 && d <= 8;
-        }
-
-        private static int perimeterCount(Point p1, List<Point> unknowns, long permutation)
-        {
-            int perimeterCount = 0;
-            for (int j = 0; j < unknowns.Count; j++)
-            {
-                if (IsInPerimeter(new Point(unknowns[j].X, unknowns[j].Y), p1) && GetBit(permutation, j))
-                    perimeterCount++;
-            }
-            return perimeterCount;
-        }
-
-        private static int LabelToNumber(char p)
+        static int LabelToNumber(char p)
         {
             byte b = (byte)p;
             if (b < 48 || b > 57) return -1;
             return b - 48;
         }
 
-        private static Point TupleCenter(Point[] Tuple)
+        static bool IsInPerimeter(Point p1, Point p2)
         {
-            Point res = new Point(0,0);
-            foreach (var item in Tuple)
-            {
-                res.X += item.X;
-                res.Y += item.Y;
-            }
-            return new Point(res.X / Tuple.Length, res.Y / Tuple.Length);
+            int d = SqDist(p1, p2);
+            return d > 0 && d <= 2;
         }
 
-        private static int SqDist(Point p1, Point p2)
+        static bool IsInExtendedPerimeter(Point p1, Point p2)
         {
-            return SqDist(p1.X, p1.Y, p2.X, p2.Y);
+            int d = SqDist(p1, p2);
+            return d > 0 && d <= 8;
         }
 
-        private static int SqDist(int x, int y, int x2, int y2)
+        static int SqDist(Point p1, Point p2)
         {
-            return (x - x2) * (x - x2) + (y - y2) * (y - y2);
+            return (p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y);
         }
 
-        private static bool GetBit(long code, int position)
+        static bool GetBit(long code, int position)
         {
             return ((code >> position) & 1) != 0;
         }
 
-        public static long SetBit(long code, bool bit, int position)
+        static long SetBit(long code, bool bit, int position)
         {
             if (bit) return (((long)1) << position) | code;
             else return (~(((long)1) << position)) & code;
-        }
-
-        private static long Pow(long _base, int exponent)
-        {
-            long p = 1;
-            for (int i = 0; i < exponent; i++)
-            {
-                p *= _base;
-            }
-            return p;
         }
     }
 }
