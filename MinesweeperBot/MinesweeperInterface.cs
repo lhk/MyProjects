@@ -30,12 +30,14 @@ namespace MinesweeperBot
         Point nextClick = new Point(-2,-2);
         Point lastClick = new Point(-2, -2);
 
+        string defaultImagePath = Program.GetBasePath() + "\\..\\..\\defaultImage.png";
+
         public MinesweeperInterface()
         {
             InitializeComponent();
             DoubleBuffered = true;
             WindowState = FormWindowState.Maximized;
-            try { defaultImageByteArray = BitmapToByteArray((Bitmap)Bitmap.FromFile(Program.GetBasePath() + "\\defaultImage.png")); }
+            try { defaultImageByteArray = BitmapToByteArray((Bitmap)Bitmap.FromFile(defaultImagePath)); }
             catch { }
         }
 
@@ -347,19 +349,12 @@ namespace MinesweeperBot
         private const int MOUSEEVENTF_RIGHTUP = 0x10;
         
 
-        private void MinesweeperInterface_MouseDown(object sender, MouseEventArgs e)
-        {
-            /*if (e.Button == System.Windows.Forms.MouseButtons.Middle && screenshot!=null)
-            {
-                screenshot.Save(Program.GetBasePath() + "\\defaultImage.png");
-            }*/
-        }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (lastScreenshot != null)
             {
-                lastScreenshot.Save(Program.GetBasePath() + "\\defaultImage.png");
+                lastScreenshot.Save(defaultImagePath);
             }
         }
 

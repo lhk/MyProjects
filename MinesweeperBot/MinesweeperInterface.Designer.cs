@@ -58,7 +58,6 @@
             this.Name = "MinesweeperInterface";
             this.Text = "MinesweeperInterface";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.MinesweeperInterface_Paint);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MinesweeperInterface_MouseDown);
             this.ResumeLayout(false);
 
         }

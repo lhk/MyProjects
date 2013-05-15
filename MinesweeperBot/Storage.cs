@@ -14,7 +14,7 @@ namespace MinesweeperBot
     public class Storage
     {
         // new SQLite
-        public static SQLiteConnection SQLite = new SQLiteConnection("Data Source=" + Program.GetBasePath() + "\\db.sqlite" + ";Version=3;Compress=True;");
+        public static SQLiteConnection SQLite = new SQLiteConnection("Data Source=" + Program.GetBasePath() + "\\..\\..\\db.sqlite" + ";Version=3;Compress=True;");
 
         public static List<DataPoint> DataPoints = null;
         public static ArtificialNeuralNetwork ANN = null;
