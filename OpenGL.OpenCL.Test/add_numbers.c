@@ -7,12 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#ifdef MAC
-#include <OpenCL/cl.h>
-#else
 #include <CL/cl.h>
-#endif
 
 /* Find a GPU or CPU associated with the first available platform */
 cl_device_id create_device() {

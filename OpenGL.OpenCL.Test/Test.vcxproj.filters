@@ -33,6 +33,9 @@
     <ClInclude Include="mainloop.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="myOpenCLContext.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="add_numbers.c">
