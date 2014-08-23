@@ -3,16 +3,21 @@ import numpy as np
 import time
 import sys
 from nPendulum import nPendulum
+import cPickle as pickle
 
 p = nPendulum(2)
 
 p.dynamic_state[0]=3
-p.dynamic_state[1]=-0.02
-p.dynamic_state[2]=0.02
+p.dynamic_state[1]=0.02
+p.dynamic_state[2]=0.04
 
 fps_count = 0
 fps_start = time.time()
 frame_count = 0
+
+
+with open('params', 'rb') as fp:
+	controll_params = pickle.load(fp)[1]
 
 # Define some colors
 BLACK	= (   0,   0,   0)
@@ -79,8 +84,8 @@ while not done:
 
 	# double pendulum controll
 	if abs(p.dynamic_state[1]) < 1 and abs(p.dynamic_state[2]) < 1:
-		p.fx[0] = np.dot(p.dynamic_state[1:],[-603.58843944,  505.360741  ,   -2.19945779,  -50.55486512,         95.50511162])
-		p.fx[2] = F1
+		p.fx[0] = np.dot(p.dynamic_state[1:],controll_params)#[-604.3727154 ,  508.08430012,   -2.05807733,  -51.33463555,94.35615764])
+		p.fx[1] = F1
 
 	p.timestep(0.005)
 

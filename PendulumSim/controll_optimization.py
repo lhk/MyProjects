@@ -2,49 +2,57 @@ import numpy as np
 from numpy import array
 from nPendulum import nPendulum
 from multiprocessing import Pool
+import cPickle as pickle
 
-def simulate(controll_params):
-	p = nPendulum(2)
-	y=4
+
+
+def simulate(arg):
+	controll_params = arg	
 	score = 0
-	while y > 2.1 and score < 10000:
-		p.fx[0] = np.dot(p.dynamic_state[1:],controll_params)
-		p.timestep(0.005)
-		y = p.getPoints()[-1][1]
-		score += 1
-	return (score,controll_params)
-
-
-def simulate2(controll_params):
 	p = nPendulum(2)
 	p.dynamic_state[0]=3
 	p.dynamic_state[1]=-0.02
 	p.dynamic_state[2]=0.02
-	score = 0
-	for i in range(800):
+	for i in range(300):
 		p.fx[0] = np.dot(p.dynamic_state[1:],controll_params)
 		p.timestep(0.005)
 		score += np.sum(np.abs(p.dynamic_state[1:]))
-	return (score,controll_params)
+
+	p = nPendulum(2)
+	p.dynamic_state[0]=3
+	p.dynamic_state[1]=0.02
+	p.dynamic_state[2]=0.04
+	for i in range(300):
+		p.fx[0] = np.dot(p.dynamic_state[1:],controll_params)
+		p.timestep(0.005)
+		score += np.sum(np.abs(p.dynamic_state[1:]))
+	return [score,controll_params]
 
 
-proc_pool = Pool(processes=8,)
+proc_pool = Pool(processes=4,)
 
 
-pool = [(2185.4832133687346, array([-603.86411394,  506.9427075 ,   -2.12051099,  -51.31956082,         95.11927173]))]
 
+with open('params', 'rb') as fp:
+	pool = [pickle.load(fp)]
+for i in range(len(pool)):
+	pool[i][0] = 1.0e20
 
 while True:
 	print('starting epoch')
 	jobs=[]
 	for i in range(len(pool)):
 		for j in range(4):
-			params = pool[i][1] + (np.random.rand(5)*2-1)*0.2
+			delta = (np.random.rand(5)*2-1)*0.05
+			params = pool[i][1] + delta
 			jobs.append(params)
 
-	pool += proc_pool.map(simulate2, jobs)
+	pool += proc_pool.map(simulate, jobs)
 
 	pool.sort(key=lambda x:x[0])
 	pool = pool[:1]
 	for l in pool:
 		print l
+
+	with open('params', 'wb') as fp:
+		pickle.dump(pool[0], fp)
