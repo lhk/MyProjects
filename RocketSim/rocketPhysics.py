@@ -1,12 +1,13 @@
 from numpy import sin,cos
 
 class rocketPhysics(object):
-	def __init__(self	):
+	def __init__(self):
 		self.x = 0.0
 		self.y = 40.0
 		self.vx = 0.0
 		self.vy = 0.0
-		self.height = 22.0
+		self.core_radius = 2.0
+		self.height = 31.0
 		self.throttle = 0.2
 		self.pitch = 3.1415/2
 		self.omega = 0
