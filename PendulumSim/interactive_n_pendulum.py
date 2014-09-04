@@ -6,7 +6,6 @@ from nPendulum import nPendulum
 
 p = nPendulum(sys.argv[1])
 
-
 fps_count = 0
 fps_start = time.time()
 

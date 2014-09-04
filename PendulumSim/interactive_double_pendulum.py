@@ -34,13 +34,14 @@ def draw_pendulum(pendulum):
 	for p1,p2 in zip(p[1:],p[:-1]):
 		pygame.draw.line(screen, BLACK, transf(p1), transf(p2), 5)
 
+
+	for i in range(pendulum.n+1):
+		pygame.draw.line(screen, RED, transf(p[i]), transf(p[i]+np.array([pendulum.fx[i]*0.08,0])), 5)
+
 	pygame.draw.line(screen, BLACK, transf([x+c,0+c]), transf([x+c,0-c]), 5)
 	pygame.draw.line(screen, BLACK, transf([x+c,0+c]), transf([x-c,0+c]), 5)
 	pygame.draw.line(screen, BLACK, transf([x-c,0-c]), transf([x-c,0+c]), 5)
 	pygame.draw.line(screen, BLACK, transf([x-c,0-c]), transf([x+c,0-c]), 5)
-
-	#pygame.draw.line(screen, RED, transf(p2), transf(p3), 5)
-	#pygame.draw.line(screen, RED, transf(p1), transf(p4), 5)
 
 
 pygame.init()
