@@ -6,8 +6,7 @@ import sys
 import os
 import ast
 from multiprocessing import Pool
-from rocketPhysics import rocketPhysics
-
+from RocketPhysics import RocketPhysics
 
 
 def eval_score(params):
@@ -18,7 +17,7 @@ def eval_score(params):
 		for j in x:
 			for k in x:
 				for l in x:
-					rocket = rocketPhysics()
+					rocket = RocketPhysics()
 					rocket.x = 10.0
 					rocket.y = 40.0+i*10.0
 					rocket.vx = 0.2*j
@@ -28,20 +27,24 @@ def eval_score(params):
 
 	score = 0
 	for rocket in rockets:
-		for i in range(150):
-			features = [rocket.x,rocket.y,rocket.vx,rocket.vy,sin(rocket.pitch),cos(rocket.pitch),sin(rocket.omega),cos(rocket.omega)]
-			rocket.throttle = np.dot(features,params[0:8]) + params[8]
-			rocket.gimbal = np.dot(features,params[9:17]) + params[17]
-			rocket.timestep(1.0/30)
+		for i in range(400):
+			features = [rocket.x,rocket.y,rocket.vx,rocket.vy,cos(rocket.pitch),rocket.omega,1]
+			rocket.throttle = np.dot(features,params[0:7])
+			rocket.gimbal = np.dot(features,params[7:14])
+			rocket.timestep(1.0/20)
 
-			score += abs(rocket.x)
-			score += abs(rocket.y-40)
-			score += 100*abs(rocket.vx)
-			score += 100*abs(rocket.vy)
-			score += 100*abs(rocket.omega)
+			#score += abs(rocket.x)
+			#score += abs(rocket.y-40)
+			#score += 100*abs(rocket.vx)
+			score += 0.1*abs(rocket.vy-1)**2
+			#score += 100*abs(rocket.omega)
+			if sin(rocket.pitch)>0:
+				score += abs(cos(rocket.pitch))**2
+			else: score += 2
+			if rocket.y<0: score+=0.5
 	return score
 
-params = [0.0001 for i in range(18)]
+params = [0.00001 for i in range(14)]
 if os.path.isfile('params'):
 	with open('params','rb') as f:
 		params = ast.literal_eval(f.read())
@@ -51,7 +54,7 @@ oldScore = eval_score(params)
 proc_pool = Pool(processes=4,)
 
 while True:
-	newParams = [params + (np.random.rand(18)*2-1)*0.004 for i in range(4)]
+	newParams = [params + (np.random.rand(14)*2-1)*0.001 for i in range(4)]
 	newScores = proc_pool.map(eval_score, newParams)
 	for i in range(4):
 		if newScores[i] < oldScore:

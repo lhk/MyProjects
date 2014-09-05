@@ -1,22 +1,42 @@
 from numpy import sin,cos
 import pygame
 import numpy as np
+from copy import copy
+from numpy.random import rand
 import time
 import sys
 import os
 import ast
-from rocketPhysics import rocketPhysics
+from RocketPhysics import RocketPhysics
+from RocketController import RocketController
 
-rocket = rocketPhysics()
+rocket = RocketPhysics()
+controller = RocketController(rocket)
+
+rocket.x = (rand()*2-1)*200
+rocket.y = rand()*100+150
+rocket.vx = (rand()*2-1)*5
+rocket.vy = (rand()*2-1)*5
+rocket.omega = (rand()*2-1)*0.5
+rocket.pitch = (rand()*2-1)*2 + 1.57
 
 fps_count = 0
 fps_start = time.time()
 
-# Define some colors
 BLACK	= (   0,   0,   0)
 WHITE	= ( 255, 255, 255)
 GREEN	= (   0, 255,   0)
 RED	  = ( 255,   0,   0)
+
+# affine transform for drawing
+def transf(v):
+	M = [
+		[3,   0, size[0]/2],
+		[0  ,-3, size[1]*5/6],
+		[0  ,   0,   1]
+		]
+	v=np.append(v,1)
+	return (np.matrix(M)*np.matrix(v).T).T.tolist()[0][:-1]
 
 def draw_rocket(rocket):
 
@@ -40,66 +60,47 @@ def draw_rocket(rocket):
 	if(rocket.throttle > 0.01): pygame.draw.line(screen, RED, transf(plume_end), transf(bottom), 5)
 
 	pygame.draw.line(screen, BLACK, transf([-1000,0]), transf([1000,0]), 2)
-	for i in range(-20,20):
+	for i in range(-10,11):
 		c = 5
 		pygame.draw.line(screen, BLACK, transf([i*c,-c]), transf([i*c+c,0]), 2)
 
 
 
-	#pygame.draw.line(screen, BLACK, transf([x+c,0+c]), transf([x-c,0+c]), 5)
-	#pygame.draw.line(screen, BLACK, transf([x-c,0-c]), transf([x-c,0+c]), 5)
-	#pygame.draw.line(screen, BLACK, transf([x-c,0-c]), transf([x+c,0-c]), 5)
-
-	#pygame.draw.line(screen, RED, transf(p2), transf(p3), 5)
-	#pygame.draw.line(screen, RED, transf(p1), transf(p4), 5)
-
-
 pygame.init()
 size = [1600, 1000]
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("My Game")
 done = False
-clock = pygame.time.Clock()
-pygame.mouse.set_visible(0)
-
-
-def transf(v):
-	M = [
-		[3,   0, size[0]/2],
-		[0  ,-3, size[1]*5/6],
-		[0  ,   0,   1]
-		]
-	v=np.append(v,1)
-	return (np.matrix(M)*np.matrix(v).T).T.tolist()[0][:-1]
+manualControl = False
 
 keystates = {}
+keystates_old = {}
 fps = 60
 
 if os.path.isfile('params'):
 	with open('params','rb') as f:
 		params = ast.literal_eval(f.read())
 
-# -------- Main Program Loop -----------
 while not done:
+	keystates_old = copy(keystates)
 	for event in pygame.event.get(): 
 		if event.type == pygame.QUIT: 
 			done = True
 	
 		elif event.type == pygame.KEYDOWN:
-			keystates[event.key] = True		
+			keystates[event.key] = True
 		elif event.type == pygame.KEYUP:
 			keystates[event.key] = False
 
+	if (not pygame.K_SPACE in keystates_old or not keystates_old[pygame.K_SPACE]) and (pygame.K_SPACE in keystates and keystates[pygame.K_SPACE]):
+		manualControl = not manualControl
 
-	rocket.throttle = 1 if pygame.K_UP in keystates and keystates[pygame.K_UP] else 0
-	rocket.gimbal = 0
-	if pygame.K_LEFT in keystates and keystates[pygame.K_LEFT]: rocket.gimbal = -1
-	if pygame.K_RIGHT in keystates and keystates[pygame.K_RIGHT]: rocket.gimbal = 1
-	
-
-	features = [rocket.x,rocket.y,rocket.vx,rocket.vy,sin(rocket.pitch),cos(rocket.pitch),sin(rocket.omega),cos(rocket.omega)]
-	rocket.throttle = np.dot(features,params[0:8]) + params[8]
-	rocket.gimbal = np.dot(features,params[9:17]) + params[17]
+	if manualControl:
+		rocket.throttle = 1 if pygame.K_UP in keystates and keystates[pygame.K_UP] else 0
+		rocket.gimbal = 0
+		if pygame.K_LEFT in keystates and keystates[pygame.K_LEFT]: rocket.gimbal = -1
+		if pygame.K_RIGHT in keystates and keystates[pygame.K_RIGHT]: rocket.gimbal = 1
+	else:
+		controller.setControls()
 
 	rocket.timestep(1.0/max(60,fps))
 

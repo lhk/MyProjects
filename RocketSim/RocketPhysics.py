@@ -1,6 +1,6 @@
 from numpy import sin,cos
 
-class rocketPhysics(object):
+class RocketPhysics(object):
 	def __init__(self):
 		self.x = 0.0
 		self.y = 40.0
