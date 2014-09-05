@@ -71,6 +71,8 @@ size = [1600, 1000]
 screen = pygame.display.set_mode(size)
 done = False
 manualControl = False
+simulationRunning = True
+fillColor = WHITE
 
 keystates = {}
 keystates_old = {}
@@ -81,32 +83,57 @@ if os.path.isfile('params'):
 		params = ast.literal_eval(f.read())
 
 while not done:
+	# input
 	keystates_old = copy(keystates)
 	for event in pygame.event.get(): 
 		if event.type == pygame.QUIT: 
-			done = True
-	
+			done = True	
 		elif event.type == pygame.KEYDOWN:
 			keystates[event.key] = True
 		elif event.type == pygame.KEYUP:
 			keystates[event.key] = False
 
+	# space pressed
 	if (not pygame.K_SPACE in keystates_old or not keystates_old[pygame.K_SPACE]) and (pygame.K_SPACE in keystates and keystates[pygame.K_SPACE]):
-		manualControl = not manualControl
+		if simulationRunning:
+			manualControl = not manualControl
+		else:
+			rocket = RocketPhysics()
+			controller = RocketController(rocket)
 
-	if manualControl:
-		rocket.throttle = 1 if pygame.K_UP in keystates and keystates[pygame.K_UP] else 0
-		rocket.gimbal = 0
-		if pygame.K_LEFT in keystates and keystates[pygame.K_LEFT]: rocket.gimbal = -1
-		if pygame.K_RIGHT in keystates and keystates[pygame.K_RIGHT]: rocket.gimbal = 1
-	else:
-		controller.setControls()
+			rocket.x = (rand()*2-1)*200
+			rocket.y = rand()*100+150
+			rocket.vx = (rand()*2-1)*5
+			rocket.vy = (rand()*2-1)*5
+			rocket.omega = (rand()*2-1)*0.5
+			rocket.pitch = (rand()*2-1)*2 + 1.57
+			simulationRunning = True
+			fillColor = WHITE
 
-	rocket.timestep(1.0/max(60,fps))
 
-	screen.fill(WHITE)
+	if simulationRunning:
+		landingStatus = rocket.landingStatus()
+		if landingStatus != None:
+			simulationRunning = False
+			fillColor = GREEN if landingStatus else RED
+
+
+
+		if manualControl:
+			rocket.throttle = 1 if pygame.K_UP in keystates and keystates[pygame.K_UP] else 0
+			rocket.gimbal = 0
+			if pygame.K_LEFT in keystates and keystates[pygame.K_LEFT]: rocket.gimbal = -1
+			if pygame.K_RIGHT in keystates and keystates[pygame.K_RIGHT]: rocket.gimbal = 1
+		else:
+			controller.setControls()
+
+		rocket.timestep(1.0/max(60,fps))
+
+	# draw
+	screen.fill(fillColor)
 	draw_rocket(rocket)
 
+	# fps counter
 	fps_count+=1
 	if fps_count > 60:
 		fps = fps_count/(1.0*time.time()-fps_start)

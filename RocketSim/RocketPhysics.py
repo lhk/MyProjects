@@ -1,4 +1,5 @@
 from numpy import sin,cos
+import numpy as np
 
 class RocketPhysics(object):
 	def __init__(self):
@@ -30,3 +31,34 @@ class RocketPhysics(object):
 		self.x += dt * self.vx
 		self.y += dt * self.vy
 		self.pitch += dt * self.omega
+
+	# returns None, False or True
+	# None -> still flying
+	# True -> landed
+	# False -> crashed
+	def landingStatus(self):
+		e_f = np.array([cos(self.pitch),sin(self.pitch)])
+		e_l = np.array([-sin(self.pitch),cos(self.pitch)])
+		cg = np.array([self.x,self.y])
+		top = cg + self.height/2* e_f
+		bottom = cg - self.height/2* e_f
+
+		hullVertices = [top,
+		top-(e_f-e_l)*self.core_radius,
+		top-(e_f+e_l)*self.core_radius,
+		bottom+e_l*self.core_radius,
+		bottom-e_l*self.core_radius,
+		bottom-(4*e_l+2*e_f)*self.core_radius,
+		bottom-(e_l-2*e_f)*self.core_radius,
+		bottom+(e_l+2*e_f)*self.core_radius,
+		bottom-(-4*e_l+2*e_f)*self.core_radius]
+
+		touchdown = any(v[1] <= 0 for v in hullVertices)
+		if not touchdown: return None
+
+		#print self.x,' -- ',abs(self.vx),' -- ',abs(self.vy),' -- ',abs(self.omega),' -- ',sin(self.pitch)
+
+		print 'landing score: ',abs(self.vx)/6 + abs(self.vy)/12 + abs(self.omega)/0.2 + 100*(1-sin(self.pitch))
+
+		return abs(self.x)<50 and abs(self.vx)<6 and abs(self.vy)<12 and abs(self.omega)<0.2 and sin(self.pitch)>0.99
+	
