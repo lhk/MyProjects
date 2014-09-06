@@ -6,7 +6,6 @@ from numpy.random import rand
 import time
 import sys
 import os
-import ast
 from RocketPhysics import RocketPhysics
 from RocketController import RocketController
 
@@ -78,10 +77,6 @@ keystates = {}
 keystates_old = {}
 fps = 60
 
-if os.path.isfile('params'):
-	with open('params','rb') as f:
-		params = ast.literal_eval(f.read())
-
 while not done:
 	# input
 	keystates_old = copy(keystates)
@@ -127,7 +122,7 @@ while not done:
 		else:
 			controller.setControls()
 
-		rocket.timestep(1.0/max(60,fps))
+		rocket.timestep(1.5/max(60,fps))
 
 	# draw
 	screen.fill(fillColor)

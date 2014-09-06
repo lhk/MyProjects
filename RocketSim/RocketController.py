@@ -1,4 +1,3 @@
-from Serializable import Serializable
 from numpy import sin,cos,exp
 
 def deadzone(x,a):
@@ -9,7 +8,7 @@ def deadzone(x,a):
 	else:
 		return x-a 
 
-class RocketController(Serializable):
+class RocketController:
 
 	def __init__(self, rocket):
 		self.rocket = rocket
@@ -21,10 +20,10 @@ class RocketController(Serializable):
 		if sin(r.pitch)<0.7:
 			r.throttle = 1
 		else:
-			r.throttle = -0.01*r.y-0.1*r.vy+0.5  +10*exp(-(r.y*0.01)**2)*abs(cos(r.pitch))
+			r.throttle = max(0.2,-0.02*r.y-0.1*r.vy+0.5  +10*exp(-(r.y*0.02)**2)*abs(cos(r.pitch)))
 
 		# pitch the nose vertical and reduce rotational velocity
-		r.gimbal = -cos(r.pitch)+r.omega
+		r.gimbal = -min(0.5,max(-0.5,cos(r.pitch)))+r.omega
 
 		# if the nose is above the horizon, steer towards the landing platform (x=0)
 		if sin(r.pitch)>0:
