@@ -8,6 +8,12 @@ def deadzone(x,a):
 	else:
 		return x-a 
 
+def step(x):
+	return 1 if x>=0 else -1
+
+def limit(x,a):
+	return min(a,max(-a,x))
+
 class RocketController:
 
 	def __init__(self, rocket):
@@ -16,15 +22,13 @@ class RocketController:
 	def setControls(self):
 		r = self.rocket
 
-		# if the nose is low, full throttle to give attitude authority
-		if sin(r.pitch)<0.7:
-			r.throttle = 1
-		else:
-			r.throttle = max(0.2,-0.02*r.y-0.1*r.vy+0.5  +10*exp(-(r.y*0.02)**2)*abs(cos(r.pitch)))
+		up = max(0,sin(r.pitch))
+		down = max(0,-sin(r.pitch))
+		side = cos(r.pitch)
 
-		# pitch the nose vertical and reduce rotational velocity
-		r.gimbal = -min(0.5,max(-0.5,cos(r.pitch)))+r.omega
 
-		# if the nose is above the horizon, steer towards the landing platform (x=0)
-		if sin(r.pitch)>0:
-			r.gimbal -= 0.005*sin(r.pitch)*(5*r.vx+deadzone(r.x,30))
+		r.gimbal = -side   +r.omega   -0.005*up*(5*r.vx+deadzone(limit(r.x,200),30))   -2*down*step(side+9*r.omega)
+
+
+		r.throttle = .5    -0.02*min(300,r.y)     -0.1*r.vy          +4*abs(r.omega)       +4*abs(side)    +3*down    +0.01*r.x
+		r.throttle =  max(0.2,r.throttle)

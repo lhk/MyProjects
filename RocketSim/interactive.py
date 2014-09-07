@@ -2,7 +2,6 @@ from numpy import sin,cos
 import pygame
 import numpy as np
 from copy import copy
-from numpy.random import rand
 import time
 import sys
 import os
@@ -12,12 +11,8 @@ from RocketController import RocketController
 rocket = RocketPhysics()
 controller = RocketController(rocket)
 
-rocket.x = (rand()*2-1)*200
-rocket.y = rand()*100+150
-rocket.vx = (rand()*2-1)*5
-rocket.vy = (rand()*2-1)*5
-rocket.omega = (rand()*2-1)*0.5
-rocket.pitch = (rand()*2-1)*2 + 1.57
+rocket.resetRandom()
+
 
 fps_count = 0
 fps_start = time.time()
@@ -29,9 +24,10 @@ RED	  = ( 255,   0,   0)
 
 # affine transform for drawing
 def transf(v):
+	zoom = min(4,1.0/max(abs(rocket.x)/500.0,abs(rocket.y)/800.0))
 	M = [
-		[3,   0, size[0]/2],
-		[0  ,-3, size[1]*5/6],
+		[zoom,   0, size[0]/2],
+		[0  ,-zoom, size[1]*11.0/12],
 		[0  ,   0,   1]
 		]
 	v=np.append(v,1)
@@ -58,11 +54,13 @@ def draw_rocket(rocket):
 	
 	if(rocket.throttle > 0.01): pygame.draw.line(screen, RED, transf(plume_end), transf(bottom), 5)
 
-	pygame.draw.line(screen, BLACK, transf([-1000,0]), transf([1000,0]), 2)
+	pygame.draw.line(screen, BLACK, transf([-10000,0]), transf([10000,0]), 2)
 	for i in range(-10,11):
 		c = 5
 		pygame.draw.line(screen, BLACK, transf([i*c,-c]), transf([i*c+c,0]), 2)
 
+	if len(rocket.trajectory)>1:
+		pygame.draw.lines(screen, ( 199, 199, 199), False, [transf(p) for p in rocket.trajectory], 2)
 
 
 pygame.init()
@@ -96,12 +94,8 @@ while not done:
 			rocket = RocketPhysics()
 			controller = RocketController(rocket)
 
-			rocket.x = (rand()*2-1)*200
-			rocket.y = rand()*100+150
-			rocket.vx = (rand()*2-1)*5
-			rocket.vy = (rand()*2-1)*5
-			rocket.omega = (rand()*2-1)*0.5
-			rocket.pitch = (rand()*2-1)*2 + 1.57
+			rocket.resetRandom()
+
 			simulationRunning = True
 			fillColor = WHITE
 
@@ -122,7 +116,7 @@ while not done:
 		else:
 			controller.setControls()
 
-		rocket.timestep(1.5/max(60,fps))
+		rocket.timestep(1.0/60)
 
 	# draw
 	screen.fill(fillColor)
