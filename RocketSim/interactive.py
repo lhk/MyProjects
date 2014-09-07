@@ -1,4 +1,4 @@
-from numpy import sin,cos
+from math import exp,log,sin,cos
 import pygame
 import numpy as np
 from copy import copy
@@ -24,7 +24,8 @@ RED	  = ( 255,   0,   0)
 
 # affine transform for drawing
 def transf(v):
-	zoom = min(4,1.0/max(abs(rocket.x)/500.0,abs(rocket.y)/800.0))
+	zoom = min(4,1.0/max(abs(rocket.x)/500.0,abs(rocket.y)/500.0))
+	zoom = pow(2,round(log(zoom,2)))
 	M = [
 		[zoom,   0, size[0]/2],
 		[0  ,-zoom, size[1]*11.0/12],
