@@ -2,6 +2,7 @@ from numpy import sin,cos
 import numpy as np
 from numpy.linalg import norm
 from numpy.random import rand
+from math import pi
 
 class RocketPhysics(object):
 	def __init__(self):
@@ -27,11 +28,30 @@ class RocketPhysics(object):
 	def resetRandom(self):		
 		self.trajectory = []
 		self.x = (rand()*2-1)*200
-		self.y = rand()*120+150
+		self.y = rand()*200+150
 		self.vx = (rand()*2-1)*10
-		self.vy = (rand()*2-1)*10
+		self.vy = -rand()*25-20
 		self.omega = (rand()*2-1)*0.8
-		self.pitch = (rand()*2-1)*20
+		self.pitch = rand()*1.5*pi-0.25*pi
+
+	def resetScenario(self,i):
+		self.trajectory = []
+		if i == 1:
+			self.x =-100
+			self.y = 300
+			self.vy = -40
+			self.vx = -40
+			self.pitch = pi/2
+			self.omega = .7
+		elif i == 2:
+			self.x = 250
+			self.y = 60
+			self.vy = 0
+			self.vx = -60
+			self.pitch = pi
+			self.omega = 0
+		else:
+			self.resetRandom()
 
 	def timestep(self, dt):
 		self.enforceRanges()

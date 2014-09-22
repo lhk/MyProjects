@@ -9,7 +9,7 @@ def deadzone(x,a):
 		return x-a 
 
 def step(x):
-	return 1 if x>=0 else -1
+	return 1 if x>0 else -1
 
 def limit(x,a):
 	return min(a,max(-a,x))
@@ -30,5 +30,5 @@ class RocketController:
 		r.gimbal = -side   +r.omega   -0.005*up*(5*r.vx+deadzone(limit(r.x,200),30))   -2*down*step(side+9*r.omega)
 
 
-		r.throttle = .5    -0.02*min(300,r.y)     -0.1*r.vy          +4*abs(r.omega)       +4*abs(side)    +3*down    +0.01*limit(abs(r.x),300)
+		r.throttle = .5    -0.03*min(300,r.y)     -0.1*r.vy          +4*abs(r.omega)       +4*abs(side)    +9*max(0,step(down))    +0.01*limit(abs(r.x),300)
 		r.throttle =  max(0.2,r.throttle)

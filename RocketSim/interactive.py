@@ -1,4 +1,4 @@
-from math import exp,log,sin,cos
+from math import exp,log,sin,cos,pi
 import pygame
 import numpy as np
 from copy import copy
@@ -7,12 +7,12 @@ import sys
 import os
 from RocketPhysics import RocketPhysics
 from RocketController import RocketController
+from RocketController2 import RocketController2
 
 rocket = RocketPhysics()
-controller = RocketController(rocket)
+controller = RocketController2(rocket)
 
-rocket.resetRandom()
-
+rocket.resetScenario(2)
 
 fps_count = 0
 fps_start = time.time()
@@ -24,8 +24,7 @@ RED	  = ( 255,   0,   0)
 
 # affine transform for drawing
 def transf(v):
-	zoom = min(4,1.0/max(abs(rocket.x)/500.0,abs(rocket.y)/500.0))
-	zoom = pow(2,round(log(zoom,2)))
+	zoom = 2.6
 	M = [
 		[zoom,   0, size[0]/2],
 		[0  ,-zoom, size[1]*11.0/12],
@@ -93,7 +92,7 @@ while not done:
 			manualControl = not manualControl
 		else:
 			rocket = RocketPhysics()
-			controller = RocketController(rocket)
+			controller = RocketController2(rocket)
 
 			rocket.resetRandom()
 
