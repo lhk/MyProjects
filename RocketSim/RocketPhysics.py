@@ -96,7 +96,7 @@ class RocketPhysics(object):
 
 		#print self.x,' -- ',abs(self.vx),' -- ',abs(self.vy),' -- ',abs(self.omega),' -- ',sin(self.pitch)
 
-		print 'landing score: ',abs(self.vx)/6 + abs(self.vy)/12 + abs(self.omega)/0.2 + 100*(1-sin(self.pitch))
+		self.landing_score = abs(self.vx)/6 + abs(self.vy)/12 + abs(self.omega)/0.2 + 100*(1-sin(self.pitch))
 
 		return abs(self.x)<50 and abs(self.vx)<6 and abs(self.vy)<12 and abs(self.omega)<0.2 and sin(self.pitch)>0.99
 	

@@ -9,10 +9,13 @@ from RocketPhysics import RocketPhysics
 from RocketController import RocketController
 from RocketController2 import RocketController2
 
-rocket = RocketPhysics()
-controller = RocketController2(rocket)
+RocketControllerClass = RocketController2
 
-rocket.resetScenario(2)
+rocket = RocketPhysics()
+controller = RocketControllerClass(rocket)
+
+s_count = 1
+rocket.resetScenario(s_count)
 
 fps_count = 0
 fps_start = time.time()
@@ -92,9 +95,10 @@ while not done:
 			manualControl = not manualControl
 		else:
 			rocket = RocketPhysics()
-			controller = RocketController2(rocket)
+			controller = RocketControllerClass(rocket)
 
-			rocket.resetRandom()
+			s_count += 1
+			rocket.resetScenario(s_count)
 
 			simulationRunning = True
 			fillColor = WHITE
