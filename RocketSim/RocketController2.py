@@ -41,7 +41,7 @@ class RocketController2:
 		vy = -1.5*sqrt(abs(y))+  ground_factor*(200*max(0,1-sin(r.pitch))  +  100*min(1,abs(r.vx)/50))
 
 		ax = (vx-r.vx)
-		ay = max(0,(vy-r.vy) + 9.81)
+		ay = max(0,(vy-r.vy) + 9.81)+1e-8
 
 		a_mag = sqrt(ax**2+ay**2)
 		if a_mag > 20:
@@ -54,9 +54,11 @@ class RocketController2:
 		if a_mag > 1e-8:
 			target_attitude = atan2(ay,ax)
 
-		r.throttle = .05 * a_mag
-		r.gimbal = 0.8*sym_mod(r.pitch-target_attitude,pi) + .8*r.omega
+		r.throttle = .05 * a_mag + 0.2*r.omega**2
+		r.gimbal = 0.8*sym_mod(r.pitch-target_attitude,pi) + (0.8+0.2*r.omega**2)*r.omega
 
-		if sin(r.pitch) < 0: 
-			r.throttle = 1
-			r.gimbal = (r.gimbal+1e-7) * 10000
+		#print 'vx: ' + str(vx) + ' ||| ' \
+		#	'vy: ' + str(vy) + ' ||| '\
+		#	'ax: ' + str(ax) + ' ||| ' \
+		#	'ay: ' + str(ay) + ' ||| ' \
+		#	'target_attitude: ' + str(target_attitude) + ' ||| '

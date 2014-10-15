@@ -114,10 +114,14 @@ class RocketPhysics(object):
 
 		return abs(self.x)<50 and abs(self.vx)<6 and abs(self.vy)<12 and abs(self.omega)<0.2 and sin(self.pitch)>0.99
 	
+
+	# returns tuple
+	# (score:float, crashed:bool, timeout:bool)
 	def controllerScore(self, controller):
 		c = controller(self)
 		fuel_score = 0
-		for i in range(2):
+		ticks = 0
+		for i in range(4):
 			self.resetScenario(i)
 			while True:
 				c.setControls()
@@ -125,6 +129,10 @@ class RocketPhysics(object):
 				self.timestep(dt)
 				fuel_score += self.throttle * dt
 				status = self.landingStatus()
-				if status == False: return False
+				if status == False:
+					return (-1, True, False)
 				elif status == True: break
-		return fuel_score
+				ticks+=1
+				if ticks > 50000:
+					return (-1, False, True)
+		return (fuel_score, False, False)
