@@ -8,13 +8,14 @@ import os
 from RocketPhysics import RocketPhysics
 from RocketController import RocketController
 from RocketController2 import RocketController2
+from RocketControllerLars import RocketControllerLars
 
 RocketControllerClass = RocketController2
 
 rocket = RocketPhysics()
 controller = RocketControllerClass(rocket)
 
-s_count = 1
+s_count = 0
 rocket.resetScenario(s_count)
 
 fps_count = 0

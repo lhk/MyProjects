@@ -36,20 +36,34 @@ class RocketPhysics(object):
 
 	def resetScenario(self,i):
 		self.trajectory = []
-		if i == 1:
+		if i == 3:
 			self.x =-100
 			self.y = 300
 			self.vy = -40
 			self.vx = -40
 			self.pitch = pi/2
 			self.omega = .7
-		elif i == 2:
+		elif i == 1:
 			self.x = 250
 			self.y = 60
 			self.vy = 0
 			self.vx = -60
 			self.pitch = pi
 			self.omega = 0
+		elif i == 2:
+			self.x = -100
+			self.y = 300
+			self.vy = 0
+			self.vx = 0
+			self.pitch = -pi/2
+			self.omega = 0
+		elif i == 0:
+			self.x = 100
+			self.y = 100
+			self.vy = 70
+			self.vx = 0
+			self.pitch = 0
+			self.omega = 8
 		else:
 			self.resetRandom()
 
@@ -67,7 +81,7 @@ class RocketPhysics(object):
 		if(len(self.trajectory)==0 or norm(np.array(self.trajectory[-1])-np.array([self.x, self.y]))>6 ):
 			self.trajectory.append((self.x, self.y))
 
-		if len(self.trajectory)>150:
+		if len(self.trajectory)>80:
 			del self.trajectory[0]
 
 	# returns None, False or True
@@ -100,3 +114,17 @@ class RocketPhysics(object):
 
 		return abs(self.x)<50 and abs(self.vx)<6 and abs(self.vy)<12 and abs(self.omega)<0.2 and sin(self.pitch)>0.99
 	
+	def controllerScore(self, controller):
+		c = controller(self)
+		fuel_score = 0
+		for i in range(2):
+			self.resetScenario(i)
+			while True:
+				c.setControls()
+				dt = 1.0/40 
+				self.timestep(dt)
+				fuel_score += self.throttle * dt
+				status = self.landingStatus()
+				if status == False: return False
+				elif status == True: break
+		return fuel_score

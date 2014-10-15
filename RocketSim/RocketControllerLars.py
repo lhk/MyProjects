@@ -44,7 +44,6 @@ class RocketControllerLars:
 
 		if(abs(r.x-center)<tolerance_x_dist):
 			# rocket is more or less centered, begin landing
-			print("landing")
 			vx=0
 			vy=-5
 
