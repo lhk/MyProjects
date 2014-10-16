@@ -35,14 +35,14 @@ class RocketControllerLars:
 	def setControls(self):
 		r = self.rocket
 
-		tolerance_x_dist=3
-		max_x_speed=10
-		center=30
+		tolerance_x_dist=5
 
+		fallof_speed=20
+		max_x_speed=10
 		vx=0
 		vy=0
 
-		if(abs(r.x-center)<tolerance_x_dist):
+		if(abs(r.x)<tolerance_x_dist):
 			# rocket is more or less centered, begin landing
 			print("landing")
 			vx=0
@@ -51,27 +51,28 @@ class RocketControllerLars:
 			target_pitch=pi/2
 			gimbal=self.calculateGimbal(target_pitch)
 			r.gimbal=gimbal
-			r.throttle=0.8
 
 		else:
 			# move towards the center, maintain current height
-			vx=-(r.x-center)/tolerance_x_dist
+			vx=-(r.x)/fallof_speed*max_x_speed
 			vx=sign(vx)*min(abs(vx),max_x_speed)
-			vy=0
+			if(r.y>10):
+				vy=-5
 
 		target_pitch=pi/2
-		tolerance_speed=10
-		factor_pitch=0.5
+		tolerance_speed=1
+		factor_pitch=1
 		
 		temp=(vx-r.vx)/tolerance_speed
 		temp=sign(temp)*min(abs(temp),1)
+		print(temp)
 		target_pitch=target_pitch-temp*factor_pitch
 
 
 		if(vy<r.vy):
-			self.throttle=self.throttle-0.1
+			self.throttle=self.throttle*1.2
 		elif(vy>r.vy):
-			self.throttle=self.throttle+0.1
+			self.throttle=self.throttle*0.8
 
 		if(self.throttle<0):
 			self.throttle=0
