@@ -8,13 +8,14 @@ import os
 from RocketPhysics import RocketPhysics
 from RocketController import RocketController
 from RocketController2 import RocketController2
+from RocketControllerLars import RocketControllerLars
 
 RocketControllerClass = RocketController2
 
 rocket = RocketPhysics()
 controller = RocketControllerClass(rocket)
 
-s_count = 1
+s_count = 0
 rocket.resetScenario(s_count)
 
 fps_count = 0
@@ -27,13 +28,17 @@ RED	  = ( 255,   0,   0)
 
 # affine transform for drawing
 def transf(v):
-	zoom = 2.6
+	zoom = 1.5
 	M = [
 		[zoom,   0, size[0]/2],
-		[0  ,-zoom, size[1]*11.0/12],
+		[0  ,-zoom, size[1]/2],
 		[0  ,   0,   1]
 		]
-	v=np.append(v,1)
+
+	translate = np.array([-round(rocket.x/600)*600, -round(rocket.y/600)*600])
+	v=np.append(np.array(v)+translate,1)
+
+	
 	return (np.matrix(M)*np.matrix(v).T).T.tolist()[0][:-1]
 
 def draw_rocket(rocket):

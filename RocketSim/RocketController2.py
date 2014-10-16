@@ -34,23 +34,31 @@ class RocketController2:
 
 		x = deadzone(r.x,30)
 		y = r.y-10
-		ground_factor = max(0,min(1,1-y/200))
+		ground_factor = max(0,min(1,1-y/120))
 
 		# desired velocity
 		vx = -.8*sign(x)*sqrt(abs(x))+.5*r.vx
-		vy = -1.5*sqrt(abs(y))+200*ground_factor*(max(0,1-sin(r.pitch))+min(1,abs(r.vx)/100))
-		vx = max(-100,min(100,vx))
+		vy = -1.5*sqrt(abs(y))+  ground_factor*(200*max(0,1-sin(r.pitch))  +  100*min(1,abs(r.vx)/50))
 
 		ax = (vx-r.vx)
-		ay = max(0,(vy-r.vy) + 9.81)
+		ay = max(0,(vy-r.vy) + 9.81)+1e-8
 
 		a_mag = sqrt(ax**2+ay**2)
 		if a_mag > 20:
 			ax -=0.5*(a_mag-20)
 
+		if abs(ax) > abs(ay):
+			ax = abs(ay) * sign(ax)
+
 		target_attitude = pi/2
 		if a_mag > 1e-8:
 			target_attitude = atan2(ay,ax)
 
-		r.throttle = .05 * a_mag #+ 0.5*abs(sym_mod(r.pitch-target_attitude,pi))
-		r.gimbal = 0.8*sym_mod(r.pitch-target_attitude,pi) + .8*r.omega
+		r.throttle = .05 * a_mag + 0.2*r.omega**2
+		r.gimbal = 0.8*sym_mod(r.pitch-target_attitude,pi) + (0.8+0.2*r.omega**2)*r.omega
+
+		#print 'vx: ' + str(vx) + ' ||| ' \
+		#	'vy: ' + str(vy) + ' ||| '\
+		#	'ax: ' + str(ax) + ' ||| ' \
+		#	'ay: ' + str(ay) + ' ||| ' \
+		#	'target_attitude: ' + str(target_attitude) + ' ||| '
