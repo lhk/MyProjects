@@ -10,13 +10,14 @@ from RocketController import RocketController
 from RocketController2 import RocketController2
 from RocketControllerLars import RocketControllerLars
 from RocketControllerLars2 import RocketControllerLars2
+from RocketControllerLars3 import RocketControllerLars3
 
-RocketControllerClass = RocketControllerLars2
+RocketControllerClass = RocketControllerLars3
 
 rocket = RocketPhysics()
 controller = RocketControllerClass(rocket)
 
-s_count = 1
+s_count = 0
 rocket.resetScenario(s_count)
 
 fps_count = 0
@@ -29,13 +30,17 @@ RED	  = ( 255,   0,   0)
 
 # affine transform for drawing
 def transf(v):
-	zoom = 2.6
+	zoom = 1.5
 	M = [
 		[zoom,   0, size[0]/2],
-		[0  ,-zoom, size[1]*11.0/12],
+		[0  ,-zoom, size[1]/2],
 		[0  ,   0,   1]
 		]
-	v=np.append(v,1)
+
+	translate = np.array([-round(rocket.x/600)*600, -round(rocket.y/600)*600])
+	v=np.append(np.array(v)+translate,1)
+
+	
 	return (np.matrix(M)*np.matrix(v).T).T.tolist()[0][:-1]
 
 def draw_rocket(rocket):
@@ -90,21 +95,6 @@ while not done:
 			keystates[event.key] = True
 		elif event.type == pygame.KEYUP:
 			keystates[event.key] = False
-
-	# reset if enter was pressed
-	if(not pygame.K_RETURN in keystates_old or not keystates_old[pygame.K_RETURN]) and (pygame.K_RETURN in keystates and keystates[pygame.K_RETURN]):
-		rocket = RocketPhysics()
-		controller = RocketControllerClass(rocket)
-
-		s_count += 1
-		rocket.resetScenario(s_count)
-
-		simulationRunning = True
-		fillColor = WHITE
-
-	if pygame.K_p in keystates and keystates[pygame.K_p]:
-		print("pitch",rocket.pitch)
-		sys.exit()
 
 	# space pressed
 	if (not pygame.K_SPACE in keystates_old or not keystates_old[pygame.K_SPACE]) and (pygame.K_SPACE in keystates and keystates[pygame.K_SPACE]):

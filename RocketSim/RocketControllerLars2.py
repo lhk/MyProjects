@@ -24,70 +24,72 @@ def deadzone(x,a):
 	else:
 		return x-a 
 
-
 def percentage(value, max):
 	if(abs(value)>max):
 		return sign(value)*1
 	else:
 		return value/max
 
-def scale(value, ref, max):
-	p = percentage(value, ref)
-	return p*max
+def scale(value, target, fallof, max_value):
+	p = percentage(target-value, fallof)
+	return p*max_value
 
-class RocketControllerLars:
+max_omega=0.5
+
+class RocketControllerLars2:
 
 	def __init__(self, rocket):
 		self.rocket = rocket
-
 		# this will be adjusted not calculated
 		self.throttle=0.5
 		
 	def setControls(self):
 		r = self.rocket
-
-		tolerance_x_dist=5
-
-		fallof_speed=20
-		max_x_speed=10
 		vx=0
 		vy=0
 
+		max_x_speed=10
+		fallof_x_dist=200
+
+		tolerance_x_dist=0
 		if(abs(r.x)<tolerance_x_dist):
 			# rocket is more or less centered, begin landing
 			vx=0
 			vy=-5
 
-			target_pitch=pi/2
-			gimbal=self.calculateGimbal(target_pitch)
-			r.gimbal=gimbal
-
 		else:
 			# move towards the center, maintain current height
-			vx=-(r.x)/fallof_speed*max_x_speed
-			vx=sign(vx)*min(abs(vx),max_x_speed)
-			if(r.y>10):
-				vy=-5
+			vx=scale(r.x, 0, fallof_x_dist, max_x_speed)
 
 		target_pitch=pi/2
-		tolerance_speed=1
-		factor_pitch=1
+		fallof_x_speed=2
+		max_delta_pitch=1
 		
-		temp=(vx-r.vx)/tolerance_speed
-		temp=sign(temp)*min(abs(temp),1)
-		print(temp)
-		target_pitch=target_pitch-temp*factor_pitch
+		delta_pitch=scale(r.vx, vx, fallof_x_speed, max_delta_pitch)
 
+		target_pitch=target_pitch-delta_pitch
 
 		if(vy<r.vy):
-			self.throttle=self.throttle*1.2
+			self.throttle-=0.2
 		elif(vy>r.vy):
-			self.throttle=self.throttle*0.8
+			self.throttle+=0.2
+
+		if(abs(r.omega)>max_omega):
+			self.throttle=1
+
 
 		if(self.throttle<0):
 			self.throttle=0
 		elif(self.throttle>1):
 			self.throttle=1
+
+		print("target_pitch",target_pitch)
+		print("rocket pitch", r.pitch)
+		print("vx", vx)
+		print("rocket vx", r.vx)
+		print("vy", vy)
+		print("rocket vy", r.vy)
+		print("throttle", self.throttle)
 
 		gimbal=self.calculateGimbal(target_pitch)
 		r.gimbal=gimbal
@@ -98,26 +100,23 @@ class RocketControllerLars:
 	'''calculate the gimbal to get to the desired target pitch'''
 	def calculateGimbal(self, target_pitch):
 		r=self.rocket
-
+		pitch=sym_mod(r.pitch,pi)
 		max_gimbal=3.1415/10
-		tolerance_pitch=pi/6
 
-		target_omega=0
-		max_omega=0.5
-		tolerance_omega=0.05
-
-		percentage=0
-		pitch=r.pitch
+		fallof_pitch=0.3
 
 		if(pitch>3/2*pi):
 			pitch=pitch-2*pi
 
-		percentage=(target_pitch-pitch)/tolerance_pitch
-		target_omega=sign(percentage)*min(abs(percentage),1)*max_omega
+		target_omega=scale(r.pitch, target_pitch, fallof_pitch, max_omega)
+
+
+		#percentage=(target_pitch-pitch)/tolerance_pitch
+		#target_omega=sign(percentage)*min(abs(percentage),1)*max_omega
 		
-		if(r.omega-target_omega>tolerance_omega):
+		if(r.omega-target_omega>0):
 			return max_gimbal
-		elif(r.omega-target_omega<-tolerance_omega):
+		elif(r.omega-target_omega<0):
 			return -max_gimbal
 		else:
 			return 0

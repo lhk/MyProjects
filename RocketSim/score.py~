@@ -5,7 +5,7 @@ from RocketControllerLars3 import RocketControllerLars3
 
 rocket = RocketPhysics()
 
-controllers = [('RocketController2',RocketController2),('RocketControllerLars3',RocketControllerLars3)]
+controllers = [('RocketController2',RocketController2),('RocketControllerLars',RocketControllerLars3)]
 
 for name,clas in controllers:
 	print '\n'+name+':'
